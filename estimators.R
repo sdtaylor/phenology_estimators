@@ -114,7 +114,7 @@ pearse_method = function(fl){
 # the mean date of "death", in this case death = flowering
 ####################################################
 library(survival)
-survival_curve_method = function(fl){
+survival_curve_method = function(fl, type = 'mean'){
   survival_model = survival::survfit(Surv(time = doy, event = flowering, type='right') ~ 1, data = fl)
   model_estimates = summary(survival_model)$table
   model_mean = model_estimates[5]
@@ -122,7 +122,22 @@ survival_curve_method = function(fl){
   # Make the position of the mean and median at 5 and 7 doesn't change
   expect_equal(names(model_mean),'*rmean')
   expect_equal(names(model_median), 'median')
-  return(floor(as.numeric(model_mean)))
+  if(type == 'mean'){
+    return(floor(as.numeric(model_mean)))
+  } else if(type == 'median'){
+    return(floor(as.numeric(model_median)))
+  } else {
+    stop('Unknown survival curve type: ',type)
+  }
+}
+
+# wrappers for the two estimate types from the survival curve
+survival_curve_mean = function(fl){
+  survival_curve_method(fl, type='mean')
+}
+
+survival_curve_median = function(fl){
+  survival_curve_method(fl, type='median')
 }
 
 ###################################################
@@ -131,4 +146,5 @@ estimator_list = list('naive_ffd' = naive_ffd,
                       'midway_method' = midway_method,
                       'logistic' = logistic_method,
                       'pearse' = pearse_method,
-                      'survival_curve' = survival_curve_method)
+                      'survival_curve_mean' = survival_curve_mean,
+                      'survival_curve_median' = survival_curve_median)
