@@ -52,6 +52,19 @@ naive_ffd = function(fl){
 }
 
 ###################################################
+# Mean flowering date
+#
+# The mean doy of all flowering==1, a very common method
+####################################################
+mean_flowering = function(fl){
+  fl %>%
+    filter(flowering == 1) %>%
+    pull(doy) %>%
+    mean()
+}
+
+
+###################################################
 # Midway Method
 #
 # The  mideway point between first "yes" and most
@@ -151,6 +164,7 @@ survival_curve_median = function(fl){
 ###################################################
 # Finally wrap them up in a list to iterate over
 estimator_list = list('naive_ffd' = naive_ffd,
+                      'mean_flowering' = mean_flowering,
                       'midway_method' = midway_method,
                       'logistic' = logistic_method,
                       'pearse' = pearse_method,
