@@ -116,14 +116,14 @@ for(this_year in unique(doy_data$year)){
           filter(year == this_year) %>%
           select(year, doy, flowering)
         
-        # Drop all flowering = 0 observations past the very first flowering date for the year,
-        # since estimators are designed to work with data leading up to flowering.
-        first_flowering_doy = year_data %>%
+        # Drop all observations past the very last flowering date for the year,
+        # since all estimators are designed to work with data leading up to, and including, flowering.
+        last_flowering_doy = year_data %>%
           filter(flowering==1) %>%
           pull(doy) %>%
-          min()
+          max()
         year_data = year_data %>%
-          filter((flowering == 1) | (flowering==0 & doy<first_flowering_doy))
+          filter(doy <= last_flowering_doy)
         
         # Get random samples of flowering 'yes' and flowering 'no'
         total_yes_obs = ceiling(this_sample_size * this_percent_yes)
