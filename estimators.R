@@ -70,8 +70,16 @@ midway_method = function(fl){
     max()
   
   midway_point = floor(first_yes - ((first_yes - most_prior_no)/2))
-  expect_gt(midway_point, 0)
-  return(midway_point)
+  
+  # Sometimes the midway point is not resolved because the random sample
+  # did not pick up any 0 observations prior to the first 1 observation.
+  # In this case just drop it by returning NA
+  if(is.infinite(midway_point)){
+    return(NA)
+  } else {
+    expect_gt(midway_point, 0)
+    return(midway_point)
+  }
 }
 
 ###################################################
