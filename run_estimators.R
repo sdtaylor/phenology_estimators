@@ -43,3 +43,5 @@ for(this_year in unique(flowering_data$year)){
     }
   }
 }
+
+write_csv(all_estimates, estimator_output_file)
