@@ -63,6 +63,46 @@ doy_data = all_possible_days %>%
 
 #####################################################################
 #####################################################################
+# Get the true dates of onset, peak, and 25% of peak
+
+flower_counts = doy_data %>%
+  group_by(year, doy) %>%
+  summarise(num_flowers = sum(flowering)) %>%
+  ungroup() %>%
+  filter(num_flowers >0) 
+
+# doy with the highest number of open flowers.
+# Taking only the first occurance if peak flower lasts >1 day
+peak_flower = flower_counts %>%
+  group_by(year) %>%
+  filter(num_flowers == max(num_flowers)) %>%
+  top_n(1, -doy) %>%
+  select(year, peak_flower = doy)
+
+# The absolute first observations of a flower
+onset_flower = flower_counts %>%
+  group_by(year) %>%
+  top_n(1, -doy) %>%
+  ungroup() %>%
+  select(year, first_flower = doy)
+
+# The doy when flowers are ~25% of the peak amount
+flower_percentiles = flower_counts %>%
+  group_by(year) %>%
+  mutate(peak_flower = max(num_flowers)) %>%
+  mutate(flower_percent = num_flowers / peak_flower) %>%
+  filter(flower_percent >= 0.25) %>%
+  top_n(1, -doy) %>%
+  ungroup() %>%
+  select(year, flowering_25_of_peak = doy)
+  
+flowering_true_dates = onset_flower %>%
+  left_join(flower_percentiles, by='year') %>%
+  left_join(peak_flower, by='year')
+
+write_csv(flowering_true_dates, true_flowering_dates_file)
+#####################################################################
+#####################################################################
 # Now setup random sampling for input into the estimators
 
 flowering_data_for_estimators = data.frame()
@@ -113,6 +153,6 @@ for(this_year in unique(doy_data$year)){
   }
 }
 
-write_csv(flowering_data_for_estimators, 'data/flowering_data_for_estimators.R')
+write_csv(flowering_data_for_estimators, data_for_estimators_file)
 
 

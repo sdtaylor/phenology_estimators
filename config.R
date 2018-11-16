@@ -11,3 +11,7 @@
 num_bootstraps = 10
 sample_sizes  = c(10,50,100)
 percent_yes   = c(0.25, 0.5, 0.75)
+
+
+data_for_estimators_file = 'data/flowering_data_for_estimators.csv'
+true_flowering_dates_file = 'data/true_flowering_dates.csv'
