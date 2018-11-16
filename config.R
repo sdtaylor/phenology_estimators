@@ -8,11 +8,11 @@
 
 # In the estimator script, each estimator will be applied to each permutation.
 
-num_bootstraps = 10
+num_bootstraps = 100
 sample_sizes  = c(10,50,100)
 percent_yes   = c(0.25, 0.5, 0.75)
 
 
-data_for_estimators_file = 'data/flowering_data_for_estimators.csv'
-true_flowering_dates_file = 'data/true_flowering_dates.csv'
-estimator_output_file = 'data/results_from_estimators.csv'
+data_for_estimators_file = 'derived_data/flowering_data_for_estimators.csv'
+true_flowering_dates_file = 'derived_data/true_flowering_dates.csv'
+estimator_output_file = 'derived_data/results_from_estimators.csv'
