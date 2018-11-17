@@ -10,17 +10,18 @@ fl_true_data = read_csv(true_flowering_dates_file) %>%
   gather(flowering_type, actual_doy, -year)
   
 
-
+avg_true_data = fl_true_data %>%
+  group_by(flowering_type) %>%
+  summarise(mean_doy = mean(actual_doy))
 ########################################################
 #
 error_estimates_per_year = fl_estimates %>%
-  group_by(year, method, sample_size, percent_yes) %>%
+  group_by(method, sample_size, percent_yes) %>%
   summarise(mean_doy_estimate = mean(estimate, na.rm=T),
             sd_doy_estimate = sd(estimate, na.rm=T),
             CI_95_low = quantile(estimate, 0.025, na.rm=T),
             CI_95_high = quantile(estimate, 0.975, na.rm=T)) %>%
-  ungroup() %>%
-  left_join(fl_true_data, by='year')
+  ungroup() 
 
 # year_separater_lines = expand.grid(year = 2005:2015,
 #                                    method = 'a')
@@ -37,15 +38,13 @@ method_labels = tribble(
 )
 method_labels$doy = 100
 
-year_to_plot = 2015
+year_to_plot = 2008
 error_estimates_per_year %>%
-  filter(flowering_type == 'first_flower',
-         year == year_to_plot) %>%
   ggplot(aes(x=mean_doy_estimate, y=method, color=method)) +
   #scale_y_continuous(labels = 2005:2015, breaks = 2005:2015) + 
   #xlim(98, 250) + 
-  geom_vline(data = filter(fl_true_data, year==year_to_plot),
-             aes(xintercept = actual_doy, linetype=flowering_type),
+  geom_vline(data = avg_true_data,
+             aes(xintercept = mean_doy, linetype=flowering_type),
              size=1) + 
   scale_linetype_manual(values = c('dotted','longdash','solid')) + 
   geom_point(size=4, show.legend = FALSE) + 
@@ -101,3 +100,22 @@ ggplot(filter(fl_estimates, year==2005), aes(x=estimate, fill=method)) +
   geom_density() + 
   geom_vline(data = filter(fl_true_data, year==2005), aes(xintercept = doy, color=flowering_type)) +
   facet_wrap(sample_size~percent_yes)
+
+
+########################################
+# calculate error of every bootstrap estimate
+errors = fl_estimates %>%
+  left_join(fl_true_data, by='year') %>%
+  group_by(method, flowering_type, sample_size, percent_yes) %>%
+  summarize(medianAE = median(abs(estimate-actual_doy), na.rm=T),
+            meanAE = mean(abs(estimate-actual_doy), na.rm=T),
+            rmse = sqrt(mean((estimate-actual_doy)^2, na.rm=T))) %>%
+  ungroup() %>%
+  gather(error_metric, error_value, medianAE,meanAE, rmse) %>%
+  group_by(error_metric, sample_size, flowering_type, percent_yes) %>%
+  mutate(error_value = round(error_value - min(error_value), 1)) %>% # Normalize to the lowest relative score
+  ungroup() %>%
+  mutate(method_metric = paste(error_metric, method,sep='-')) %>%
+  select(-method, -error_metric) %>%
+  spread(method_metric, error_value) %>%
+  arrange(flowering_type,sample_size, percent_yes)
