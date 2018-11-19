@@ -86,15 +86,15 @@ onset_flower = flower_counts %>%
   ungroup() %>%
   select(year, first_flower = doy)
 
-# The doy when flowers are ~25% of the peak amount
+# The doy when flowers are ~50% of the peak amount
 flower_percentiles = flower_counts %>%
   group_by(year) %>%
   mutate(peak_flower = max(num_flowers)) %>%
   mutate(flower_percent = num_flowers / peak_flower) %>%
-  filter(flower_percent >= 0.25) %>%
+  filter(flower_percent >= 0.50) %>%
   top_n(1, -doy) %>%
   ungroup() %>%
-  select(year, flowering_25_of_peak = doy)
+  select(year, flowering_50_of_peak = doy)
   
 flowering_true_dates = onset_flower %>%
   left_join(flower_percentiles, by='year') %>%
