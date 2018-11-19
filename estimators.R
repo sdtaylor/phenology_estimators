@@ -22,10 +22,10 @@ library(testthat)
 
 ###################################################
 # Some flowering data to use in testing
-# sample_data = read_csv('data/flowering_data_for_estimators.R') %>%
+# sample_data = read_csv('derived_data/flowering_data_for_estimators.csv') %>%
 #   filter(year == 2008,
 #          sample_size == 100,
-#          percent_yes == 0.5, 
+#          percent_yes == 0.5,
 #          bootstrap_i == 1)
 
 #############################################
