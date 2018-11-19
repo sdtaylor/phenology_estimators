@@ -119,3 +119,20 @@ errors = fl_estimates %>%
   select(-method, -error_metric) %>%
   spread(method_metric, error_value) %>%
   arrange(flowering_type,sample_size, percent_yes)
+
+#########################################
+library(ggridges)
+errors = fl_estimates %>%
+  left_join(fl_true_data, by='year') %>%
+  mutate(error = estimate - actual_doy)
+
+
+ggplot(filter(errors, flowering_type=='first_flower'), aes(x=error, y=method)) + 
+  geom_density_ridges(fill=NA, size=1, aes(color=method)) + 
+  geom_vline(xintercept = 0, size=1) + 
+  scale_color_brewer(palette = 'Dark2') + 
+  xlim(-50,50) + 
+  facet_wrap(sample_size~percent_yes) +
+  theme_bw()
+
+
