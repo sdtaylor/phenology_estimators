@@ -110,7 +110,7 @@ midway_individual = function(fl, prior_no_threshold=Inf){
     return(NA)
   }
   
-  midway_point = floor(first_yes - ((first_yes - most_prior_no)/2))
+  midway_point = first_yes - ((first_yes - most_prior_no)/2)
   
   # Sometimes the midway point is not resolved because the random sample
   # did not pick up any 0 observations prior to the first 1 observation.
@@ -173,7 +173,7 @@ source('weibull.R')
 pearse_method = function(fl){
   flowering_yes = fl %>%
     filter(flowering==1)
-  floor(as.numeric(weib.limit(flowering_yes$doy)[1]))
+  as.numeric(weib.limit(flowering_yes$doy)[1])
 }
 
 ###################################################
@@ -192,9 +192,9 @@ survival_curve_method = function(fl, type = 'median'){
   expect_equal(names(model_mean),'*rmean')
   expect_equal(names(model_median), 'median')
   if(type == 'mean'){
-    return(floor(as.numeric(model_mean)))
+    return(as.numeric(model_mean))
   } else if(type == 'median'){
-    return(floor(as.numeric(model_median)))
+    return(as.numeric(model_median))
   } else {
     stop('Unknown survival curve type: ',type)
   }
