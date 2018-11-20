@@ -24,7 +24,7 @@ library(testthat)
 # Some flowering data to use in testing
 # sample_data = read_csv('derived_data/flowering_data_for_estimators.csv') %>%
 #   filter(year == 2008,
-#          sample_size == 100,
+#          sample_size == 10,
 #          percent_yes == 0.5,
 #          bootstrap_i == 1)
 
@@ -37,13 +37,35 @@ qc_data = function(fl){
   expect_length(unique(fl$bootstrap_i), 1)
 }
 
+##################################################
+# Drops flowering=0 observations.
+# Drops leading (leading up to flower) observations when
+# estimating the end of flowering. Drops trailign when
+# estimating the onset of flowering
+drop_zeros = function(fl, type_to_drop='leading'){
+  flowering_days = fl %>%
+    filter(flowering==1) %>%
+    pull(doy)
+  
+  if(type_to_drop == 'leading'){
+    fl = fl %>%
+      filter(doy >= min(flowering_days))
+  } else if(type_to_drop == 'trailing'){
+    fl = fl %>%
+      filter(doy <= max(flowering_days))
+  } else {
+    stop('Unknown type to drop: ',type_to_drop)
+  }
+  return(fl)
+}
+
 ###################################################
-# Naive First Flowering Date
+# First observed Flowering Date
 #
-# The first time a flower is seen is the FFD
+# The first/last time a flower is seen is the FFD/last flowering day
 ####################################################
 
-naive_ffd = function(fl){
+first_observed = function(fl){
   qc_data(fl)
   fl %>%
     filter(flowering == 1) %>%
@@ -63,15 +85,17 @@ mean_flowering = function(fl){
     mean()
 }
 
-
 ###################################################
-# Midway Method
+# Midway Method for an individual
 #
 # The  mideway point between first "yes" and most
 # prior "no". Rounded down to the doy when the midway is a fraction.
 ####################################################
 
-midway_method = function(fl){
+midway_individual = function(fl, prior_no_threshold=Inf){
+  # Ensure only one individual is plant being passed.
+  expect_length(unique(fl$plant_id), 1)
+  
   first_yes = fl %>%
     filter(flowering == 1) %>%
     pull(doy) %>%
@@ -82,6 +106,10 @@ midway_method = function(fl){
     pull(doy) %>%
     max()
   
+  if(first_yes - most_prior_no > prior_no_threshold){
+    return(NA)
+  }
+  
   midway_point = floor(first_yes - ((first_yes - most_prior_no)/2))
   
   # Sometimes the midway point is not resolved because the random sample
@@ -90,9 +118,29 @@ midway_method = function(fl){
   if(is.infinite(midway_point)){
     return(NA)
   } else {
-    expect_gt(midway_point, 0)
     return(midway_point)
   }
+}
+
+###################################################
+# Midway Method for a population
+#
+# The  mideway point between first "yes" and most
+# prior "no" for each individual, then get the mean.
+# Optionally enforce a threshold in the days since
+# the most prior "no" for each individual
+####################################################
+
+midway_population = function(fl, population_prior_no_threshold=Inf){
+  
+  individual_onsets = c()
+  for(plant in unique(fl$plant_id)){
+    individual_data = fl %>%
+      filter(plant_id==plant)
+    individual_onsets = c(individual_onsets, midway_individual(individual_data, prior_no_threshold = population_prior_no_threshold))
+  }
+  
+  return(mean(individual_onsets), na.rm=T)
 }
 
 ###################################################
@@ -161,11 +209,139 @@ survival_curve_median = function(fl){
   survival_curve_method(fl, type='median')
 }
 
+
 ###################################################
-# Finally wrap them up in a list to iterate over
-estimator_list = list('naive_ffd' = naive_ffd,
-                      'mean_flowering' = mean_flowering,
-                      'midway_method' = midway_method,
-                      'logistic' = logistic_method,
-                      'pearse' = pearse_method,
-                      'survival_curve_median' = survival_curve_median)
+###################################################
+# Wrappers that will actually be called to run the estimators
+# These function perform various transformations depending on which
+# estimator is being used for onset,end, or peak.
+#
+# For example, using the weibull curve/pearse method the same code for the onset of 
+# flowering can be used to calculate end of flowering if you just transform all doy
+# values to negative, and then the result back to postiive. 
+###################################################
+###################################################
+
+population_flowering_estimates = function(fl, estimator_name, flowering_metric){
+  #####
+  #Onset estimators
+  if(flowering_metric == 'onset'){
+    fl = drop_zeros(fl, type_to_drop = 'trailing')
+      
+    if(estimator_name=='first_observed'){
+      return(first_observed(fl))
+    } else if(estimator_name=='mean_midway'){
+      return(midway_population(fl))
+    } else if(estimator_name=='mean_midway_7day'){
+      return(midway_population(fl, population_prior_no_threshold=7))
+    } else if(estimator_name=='logistic'){
+      return(logistic_method(fl))
+    } else if(estimator_name=='pearse'){
+      return(pearse_method(fl))
+    } else {
+      stop('Unknown estimator name for onset ',estimator_name)
+    }
+
+  #####
+  #End estimators
+  } else if(flowering_metric == 'end'){
+    fl = drop_zeros(fl, type_to_drop = 'leading')
+    
+    if(estimator_name=='first_observed'){
+      fl$doy = fl$doy * -1
+      return(first_observed(fl)*-1)
+      
+    } else if(estimator_name=='mean_midway'){
+      fl$doy = fl$doy * -1
+      return(midway_population(fl) * -1)
+    } else if(estimator_name=='mean_midway_7day'){
+      fl$doy = fl$doy * -1
+      return(midway_population(fl, population_prior_no_threshold=7) * -1)
+      
+    } else if(estimator_name=='logistic'){
+      #swap the flowering so 0=1 and 1=0
+      #for the end of flowering estimate using
+      #logistic regression
+      fl$flowering = abs(fl$flowering - 1)
+      return(logistic_method(fl))
+    } else if(estimator_name=='pearse'){
+      #transpose flowering dates to negative
+      #to estimate the end of flowering
+      #using weibull curve/pearse method
+      fl$doy = fl$doy * -1
+      return(pearse_method(fl) * -1)
+    } else {
+      stop('Unknown estimator name for end of flowering ',estimator_name)
+    }
+    
+  #####
+  #Peak estimators
+  } else if(flowering_metric == 'peak'){
+    
+    if(estimator_name=='survival_curve_median'){
+      fl = drop_zeros(fl, type_to_drop = 'trailing')
+      return(survival_curve_median(fl))
+    } else if(estimator_name=='mean_flowering'){
+      return(mean_flowering(fl))
+    } else {
+      stop('Unknown estimator name for peak flowering',estimator_name)
+    }
+  }
+}
+
+####################
+individual_flowering_estimates = function(fl, estimator_name, flowering_metric){
+  #####
+  #Onset estimators
+  if(flowering_metric == 'onset'){
+    fl = drop_zeros(fl, type_to_drop = 'trailing')
+    
+    if(estimator_name=='first_observed'){
+      return(first_observed(fl))
+
+    } else if(estimator_name=='midway'){
+      return(midway_individual(fl))
+    } else if(estimator_name=='midway_7day'){
+      return(midway_individual(fl, prior_no_threshold=7))
+      
+    } else if(estimator_name=='logistic'){
+      return(logistic_method(fl))
+    } else if(estimator_name=='pearse'){
+      return(pearse_method(fl))
+    } else {
+      stop('Unknown estimator name for onset ',estimator_name)
+    }
+    
+    #####
+    #End estimators
+  } else if(flowering_metric == 'end'){
+    fl = drop_zeros(fl, type_to_drop = 'leading')
+    
+    if(estimator_name=='first_observed'){
+      fl$doy = fl$doy * -1
+      return(first_observed(fl)*-1)
+      
+    } else if(estimator_name=='midway'){
+      fl$doy = fl$doy * -1
+      return(midway_individual(fl) * -1)
+    } else if(estimator_name=='midway_7day'){
+      fl$doy = fl$doy * -1
+      return(midway_individual(fl, prior_no_threshold=7) * -1)
+      
+    } else if(estimator_name=='logistic'){
+      #swap the flowering so 0=1 and 1=0
+      #for the end of flowering estimate using
+      #logistic regression
+      fl$flowering = abs(fl$flowering - 1)
+      return(logistic_method(fl))
+    } else if(estimator_name=='pearse'){
+      #transpose flowering dates to negative
+      #to estimate the end of flowering
+      #using weibull curve/pearse method
+      fl$doy = fl$doy * -1
+      return(pearse_method(fl) * -1)
+    } else {
+      stop('Unknown estimator name for end of flowering ',estimator_name)
+    }
+  } 
+}
