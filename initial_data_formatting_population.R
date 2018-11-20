@@ -84,23 +84,19 @@ onset_flower = flower_counts %>%
   group_by(year) %>%
   top_n(1, -doy) %>%
   ungroup() %>%
-  select(year, first_flower = doy)
+  select(year, onset_flower = doy)
 
-# The doy when flowers are ~50% of the peak amount
-flower_percentiles = flower_counts %>%
+end_flower = flower_counts %>%
   group_by(year) %>%
-  mutate(peak_flower = max(num_flowers)) %>%
-  mutate(flower_percent = num_flowers / peak_flower) %>%
-  filter(flower_percent >= 0.50) %>%
-  top_n(1, -doy) %>%
+  top_n(1, doy) %>%
   ungroup() %>%
-  select(year, flowering_50_of_peak = doy)
-  
-flowering_true_dates = onset_flower %>%
-  left_join(flower_percentiles, by='year') %>%
-  left_join(peak_flower, by='year')
+  select(year, end_flower = doy)
 
-write_csv(flowering_true_dates, true_flowering_dates_file)
+flowering_true_dates = onset_flower %>%
+  left_join(peak_flower, by='year') %>%
+  left_join(end_flower, by='year')
+
+write_csv(flowering_true_dates, population_true_flowering_dates_file)
 #####################################################################
 #####################################################################
 # Now setup random sampling for input into the estimators
@@ -108,22 +104,13 @@ write_csv(flowering_true_dates, true_flowering_dates_file)
 flowering_data_for_estimators = data.frame()
 
 for(this_year in unique(doy_data$year)){
-  for(this_sample_size in sample_sizes){
+  for(this_sample_size in population_sample_sizes){
     for(this_percent_yes in percent_yes){
       for(bootstrap_i in 1:num_bootstraps){
         
         year_data = doy_data %>%
           filter(year == this_year) %>%
-          select(year, doy, flowering)
-        
-        # Drop all observations past the very last flowering date for the year,
-        # since all estimators are designed to work with data leading up to, and including, flowering.
-        last_flowering_doy = year_data %>%
-          filter(flowering==1) %>%
-          pull(doy) %>%
-          max()
-        year_data = year_data %>%
-          filter(doy <= last_flowering_doy)
+          select(year, doy, flowering, plant_id)
         
         # Get random samples of flowering 'yes' and flowering 'no'
         total_yes_obs = ceiling(this_sample_size * this_percent_yes)
@@ -153,6 +140,6 @@ for(this_year in unique(doy_data$year)){
   }
 }
 
-write_csv(flowering_data_for_estimators, data_for_estimators_file)
+write_csv(flowering_data_for_estimators, population_data_for_estimators_file)
 
 
