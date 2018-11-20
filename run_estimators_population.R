@@ -3,14 +3,14 @@ library(tidyverse)
 source('config.R')
 source('estimators.R')
 
-flowering_data = read_csv(data_for_estimators_file)
+flowering_data = read_csv(population_data_for_estimators_file)
 ##################################################################
 # 
 
 all_estimates = data.frame()
 
 for(this_year in unique(flowering_data$year)){
-  for(this_sample_size in sample_sizes){
+  for(this_sample_size in population_sample_sizes){
     for(this_percent_yes in percent_yes){
       for(this_bootstrap in 1:num_bootstraps){
         
@@ -22,14 +22,37 @@ for(this_year in unique(flowering_data$year)){
         
         subset_estimates = data.frame()
         
-        for(estimator_method_name in names(estimator_list)){
-          
-          # Estimator function called here
-          estimate = estimator_list[estimator_method_name][[1]](data_subset)
-          
+        # Onset estimates
+        for(estimator_method_name in population_onset_estimators){
+          estimate = population_flowering_estimates(data_subset, 
+                                                    estimator_name = estimator_method_name,
+                                                    flowering_metric = 'onset')
           subset_estimates = subset_estimates %>%
             bind_rows(data.frame(method = estimator_method_name,
-                                 estimate = estimate))
+                                 'metric' = 'onset',
+                                 'estimate' = estimate))
+        }
+        
+        # end estimates
+        for(estimator_method_name in population_end_estimators){
+          estimate = population_flowering_estimates(data_subset, 
+                                                    estimator_name = estimator_method_name,
+                                                    flowering_metric = 'end')
+          subset_estimates = subset_estimates %>%
+            bind_rows(data.frame(method = estimator_method_name,
+                                 'metric' = 'end',
+                                 'estimate' = estimate))
+        }
+        
+        # peak estimates
+        for(estimator_method_name in population_peak_estimators){
+          estimate = population_flowering_estimates(data_subset, 
+                                                    estimator_name = estimator_method_name,
+                                                    flowering_metric = 'peak')
+          subset_estimates = subset_estimates %>%
+            bind_rows(data.frame(method = estimator_method_name,
+                                 'metric' = 'peak',
+                                 'estimate' = estimate))
         }
         
         subset_estimates$year = this_year
@@ -44,4 +67,4 @@ for(this_year in unique(flowering_data$year)){
   }
 }
 
-write_csv(all_estimates, estimator_output_file)
+write_csv(all_estimates, population_estimator_output_file)

@@ -140,7 +140,7 @@ midway_population = function(fl, population_prior_no_threshold=Inf){
     individual_onsets = c(individual_onsets, midway_individual(individual_data, prior_no_threshold = population_prior_no_threshold))
   }
   
-  return(mean(individual_onsets), na.rm=T)
+  return(mean(individual_onsets, na.rm=T))
 }
 
 ###################################################
