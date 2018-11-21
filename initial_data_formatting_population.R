@@ -77,20 +77,20 @@ peak_flower = flower_counts %>%
   group_by(year) %>%
   filter(num_flowers == max(num_flowers)) %>%
   top_n(1, -doy) %>%
-  select(year, peak_flower = doy)
+  select(year, peak = doy)
 
 # The absolute first observations of a flower
 onset_flower = flower_counts %>%
   group_by(year) %>%
   top_n(1, -doy) %>%
   ungroup() %>%
-  select(year, onset_flower = doy)
+  select(year, onset = doy)
 
 end_flower = flower_counts %>%
   group_by(year) %>%
   top_n(1, doy) %>%
   ungroup() %>%
-  select(year, end_flower = doy)
+  select(year, end = doy)
 
 flowering_true_dates = onset_flower %>%
   left_join(peak_flower, by='year') %>%

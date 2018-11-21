@@ -72,20 +72,20 @@ onset_flower = doy_data %>%
   group_by(year, plant_id) %>%
   top_n(1, -doy) %>%
   ungroup() %>%
-  select(year, plant_id, onset_flowering = doy)
+  select(year, plant_id, onset = doy)
 
 end_flower = doy_data %>%
   filter(flowering == 1) %>%
   group_by(year, plant_id) %>%
   top_n(1, doy) %>%
   ungroup() %>%
-  select(year, plant_id, end_flowering = doy)
+  select(year, plant_id, end = doy)
 
 flowering_true_dates = onset_flower %>%
   left_join(end_flower, by=c('year','plant_id')) 
 
 # No flowering end date should be prior to flowering onset dat
-end_flowering_minus_onset_flowering = with(flowering_true_dates, end_flowering-onset_flowering)
+end_flowering_minus_onset_flowering = with(flowering_true_dates, end-onset)
 expect_equal(sum(end_flowering_minus_onset_flowering<=0), 0)
 
 write_csv(flowering_true_dates, individual_true_flowering_dates_file)
