@@ -15,7 +15,7 @@ individual_sample_sizes  = c(10,15,20)
 population_sample_sizes  = c(10,50,100)
 
 
-minimum_flowering_days_for_individuals = 30
+minimum_flowering_days_for_individuals = 20
 
 individual_data_for_estimators_file = 'derived_data/individual_flowering_data_for_estimators.csv'
 individual_true_flowering_dates_file = 'derived_data/individual_true_flowering_dates.csv'

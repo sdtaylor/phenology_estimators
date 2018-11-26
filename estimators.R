@@ -21,10 +21,10 @@ library(testthat)
 # The function qc_data() will enforce this requirement.
 
 ###################################################
-# Some flowering data to use in testing
-# sample_data = read_csv('derived_data/flowering_data_for_estimators.csv') %>%
+#Some flowering data to use in testing
+# sample_data = read_csv('derived_data/population_flowering_data_for_estimators.csv') %>%
 #   filter(year == 2008,
-#          sample_size == 10,
+#          sample_size == 100,
 #          percent_yes == 0.5,
 #          bootstrap_i == 1)
 
@@ -38,7 +38,7 @@ qc_data = function(fl){
 }
 
 ##################################################
-# Drops flowering=0 observations.
+# Helper function to drop flowering=0 observations.
 # Drops leading (leading up to flower) observations when
 # estimating the end of flowering. Drops trailign when
 # estimating the onset of flowering
@@ -57,6 +57,49 @@ drop_zeros = function(fl, type_to_drop='leading'){
     stop('Unknown type to drop: ',type_to_drop)
   }
   return(fl)
+}
+
+###################################################
+# GAM model
+#
+# This draws a logistic smoother over the entire year
+# peak: the maximum probability of flower
+# onset: first doy prior to peak where flowering is >= 0.01
+# end: last doy after peak where flowering is <= 0.01
+####################################################
+
+gam_estimate = function(fl, metric='onset'){
+  gam_model = tryCatch({mgcv::gam(flowering ~ s(doy), family=binomial, data=fl)},
+                        error = function(x){return(NA)})
+
+  if(is.na(gam_model)){
+    return(NA)
+    }
+  
+  all_doys = data.frame(doy = 1:366)
+  all_doys$flowering_probability = predict(gam_model, newdata = all_doys, type = 'response')
+  peak_doy = all_doys$doy[which.max(all_doys$flowering_probability)]
+  onset_doy = all_doys %>%
+    filter(doy <= peak_doy, flowering_probability >= 0.01) %>%
+    pull(doy) %>%
+    min()
+  end_doy = all_doys %>%
+    filter(doy >= peak_doy, flowering_probability <= 0.01) %>%
+    pull(doy) %>%
+    min()
+  
+  if(metric=='peak'){
+    return(peak_doy)
+  } else if(metric=='onset'){
+    return(onset_doy)
+  } else if(metric=='end'){
+    return(end_doy)
+  } else if(metric=='all'){
+    #return(list('onset' = onset_doy, 'peak' = peak_doy, 'end' = end_doy))
+    return(c(onset_doy, peak_doy, end_doy))
+  } else {
+    stop('Unknown metric type: ',metric)
+  }
 }
 
 ###################################################
