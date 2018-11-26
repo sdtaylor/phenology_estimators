@@ -6,13 +6,20 @@ source('config.R')
 library(ggridges)
 
 get_plot = function(error_df, metric_to_plot,
-                    x_lower_bound=-50, x_upper_bound=50){
-  p= 5
-  ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
-    geom_text(aes(y=method, x=-50, label=error_text, size=3.5, hjust=0, vjust=-1)) +
-    #geom_density_ridges(fill=NA, size=1.5, aes(color=method)) + 
+                    x_lower_bound=-50, x_upper_bound=50,
+                    error_text_x_placement, error_text_y_nudge=0.5){
+  
+  error_text_only = error_df %>%
+    filter(metric==metric_to_plot) %>%
+    select(method, sample_size_display, percent_yes_display, error_text) %>%
+    distinct()
+  
+  p=  ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
+    geom_density_ridges(fill=NA, size=1.5, aes(color=method), panel_scaling=FALSE) + 
+    geom_label(data=error_text_only, aes(x=error_text_x_placement, label=error_text), inherit.aes = TRUE,
+              hjust=0, nudge_y =error_text_y_nudge, size=2.7, label.size = 0, alpha=0.8) +
     geom_vline(xintercept = 0, size=1) + 
-    #scale_color_brewer(palette = 'Dark2') + 
+    scale_color_brewer(palette = 'Dark2') + 
     xlim(x_lower_bound,x_upper_bound) + 
     facet_wrap(sample_size_display~percent_yes_display) +
     #theme_light() +
@@ -41,10 +48,20 @@ population_errors = population_estimates %>%
   left_join(population_true_data, by=c('year','metric')) %>%
   mutate(error = estimate - actual_doy)
 
-population_errors = population_errors %>%
-  group_by(metric, method, sample_size, percent_yes) %>%
-  ungroup()
+# Calculate the median and CI's of density curves in the plots
+population_errors_text = population_errors %>%
+  group_by(method, metric, sample_size, percent_yes) %>%
+  summarise(median_error = round(median(error, na.rm = T),0),
+            quantile_025_error = round(quantile(error, 0.025, na.rm = T),0),
+            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0)) %>%
+  ungroup() %>%
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')) %>%
+  select(method, metric, sample_size, percent_yes, error_text) 
 
+population_errors = population_errors %>%
+  left_join(population_errors_text, by=c('metric','method','percent_yes','sample_size'))
+
+# Nicer looking names for everything
 population_errors$method = as.factor(population_errors$method)
 population_errors$method = forcats::fct_recode(population_errors$method, 'First Observed'='first_observed',
                                                    'Mean Flowering' = 'mean_flowering',
@@ -60,13 +77,13 @@ population_errors$sample_size_display = forcats::fct_reorder(population_errors$s
 
 
 
-pop_onset_plot = get_plot(population_errors, 'onset')
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = 20)
 ggsave(filename = 'manuscript/population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_end_plot = get_plot(population_errors, 'end')
+pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45)
 ggsave(filename = 'manuscript/population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10)
+pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6)
 ggsave(filename = 'manuscript/population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
@@ -81,9 +98,18 @@ individual_errors = individual_estimates %>%
   left_join(individual_true_data, by=c('year','metric','plant_id')) %>%
   mutate(error = estimate - actual_doy)
 
+# Calculate the median and CI's of density curves in the plots
+individual_errors_text = individual_errors %>%
+  group_by(method, metric, sample_size, percent_yes) %>%
+  summarise(median_error = round(median(error, na.rm = T),0),
+            quantile_025_error = round(quantile(error, 0.025, na.rm = T),0),
+            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0)) %>%
+  ungroup() %>%
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')) %>%
+  select(method, metric, sample_size, percent_yes, error_text) 
+
 individual_errors = individual_errors %>%
-  group_by(metric, method, sample_size, percent_yes) %>%
-  ungroup()
+  left_join(individual_errors_text, by=c('metric','method','percent_yes','sample_size'))
 
 individual_errors$method = as.factor(individual_errors$method)
 individual_errors$method = forcats::fct_recode(individual_errors$method, 'First Observed'='first_observed',
@@ -98,23 +124,10 @@ individual_errors$sample_size_display = forcats::fct_reorder(individual_errors$s
 
 
 
-ind_onset_plot = get_plot(individual_errors, 'onset')
+ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50)
 ggsave(filename = 'manuscript/individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-ind_end_plot = get_plot(individual_errors, 'end')
+ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50)
 ggsave(filename = 'manuscript/individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-################################
-library(kableExtra)
 
-population_errors_text = population_errors %>%
-  group_by(method, metric, sample_size, percent_yes) %>%
-  summarise(median_error = round(median(error, na.rm = T),1),
-            quantile_025_error = round(quantile(error, 0.025, na.rm = T),1),
-            quantile_975_error= round(quantile(error, 0.975, na.rm = T),1)) %>%
-  ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')) %>%
-  select(method, metric, sample_size, percent_yes, error_text) 
-
-population_errors = population_errors %>%
-  left_join(population_errors_text, by=c('metric','method','percent_yes','sample_size'))
