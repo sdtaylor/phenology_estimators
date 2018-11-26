@@ -69,6 +69,7 @@ population_errors$method = forcats::fct_recode(population_errors$method, 'First 
                                                    'Mean Midway' = 'mean_midway',
                                                    'Mean Midway 7-Day' = "mean_midway_7day",
                                                    'Logistic' = 'logistic',
+                                                   'GAM' = 'gam',
                                                    'Weibull Curve' = 'pearse')
 population_errors = population_errors %>%
   mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
@@ -116,6 +117,7 @@ individual_errors$method = forcats::fct_recode(individual_errors$method, 'First 
                                                                          'Midway' = 'midway',
                                                                          'Midway 7-Day' = 'midway_7day',
                                                                          'Logistic' = 'logistic',
+                                                                         'GAM' = 'gam',
                                                                          'Weibull Curve' = 'pearse')
 individual_errors = individual_errors %>%
   mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
