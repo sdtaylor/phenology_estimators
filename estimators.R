@@ -69,7 +69,12 @@ drop_zeros = function(fl, type_to_drop='leading'){
 ####################################################
 
 gam_estimate = function(fl, metric='onset'){
-  gam_model = mgcv::gam(flowering ~ s(doy), family=binomial, data=fl)
+  gam_model = tryCatch({mgcv::gam(flowering ~ s(doy), family=binomial, data=fl)},
+                        error = function(x){return(NA)})
+
+  if(is.na(gam_model)){
+    return(NA)
+    }
   
   all_doys = data.frame(doy = 1:366)
   all_doys$flowering_probability = predict(gam_model, newdata = all_doys, type = 'response')
