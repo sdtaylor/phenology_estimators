@@ -18,7 +18,7 @@ get_plot = function(error_df, metric_to_plot,
   p=  ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
     geom_density_ridges(fill=NA, size=1.5, aes(color=method), panel_scaling=FALSE) + 
     geom_label(data=error_text_only, aes(x=error_text_x_placement, label=error_text), inherit.aes = TRUE,
-              hjust=0, nudge_y =error_text_y_nudge, size=2.5, label.size = 0, alpha=0.8, parse=TRUE) +
+              hjust=0, nudge_y =error_text_y_nudge, size=2.5, label.size = 0, alpha=0.8) +
     geom_label(data=error_text_only, aes(x=r2_text_x_placement, label=r2_text), inherit.aes = TRUE,
                hjust=0, nudge_y =r2_text_y_nudge, size=2.3, label.size = 0, alpha=0.8, parse=TRUE) +
     geom_vline(xintercept = 0, size=1) + 
@@ -59,17 +59,8 @@ population_errors_text = population_errors %>%
             quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
             R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  group_by(metric, sample_size, percent_yes) %>%
-  mutate(winning_r2 = (R2 == min(R2)),
-         winning_median = (median_error == min(median_error))) %>%
-  ungroup() %>%
-  mutate(error_text = case_when(
-            winning_median ~ paste0('bold(',median_error,') (',quantile_025_error,', ',quantile_975_error,')'),
-            !winning_median ~ paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')),
-        r2_text = case_when(
-            winning_r2 ~ paste0('R^2 == bold(',round(R2,2),')'),
-            !winning_r2~ paste0('R^2 == ',round(R2,2))
-        )) %>%
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')'),
+         r2_text = paste0('R^2 == ',round(R2,2))) %>%
   select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
 population_errors = population_errors %>%
