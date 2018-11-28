@@ -7,17 +7,20 @@ library(ggridges)
 
 get_plot = function(error_df, metric_to_plot,
                     x_lower_bound=-50, x_upper_bound=50,
-                    error_text_x_placement, error_text_y_nudge=0.5){
+                    error_text_x_placement, error_text_y_nudge=0.5,
+                    r2_text_x_placement, r2_text_y_nudge=0.5){
   
   error_text_only = error_df %>%
     filter(metric==metric_to_plot) %>%
-    select(method, sample_size_display, percent_yes_display, error_text) %>%
+    select(method, sample_size_display, percent_yes_display, error_text, r2_text) %>%
     distinct()
   
   p=  ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
     geom_density_ridges(fill=NA, size=1.5, aes(color=method), panel_scaling=FALSE) + 
     geom_label(data=error_text_only, aes(x=error_text_x_placement, label=error_text), inherit.aes = TRUE,
-              hjust=0, nudge_y =error_text_y_nudge, size=2.7, label.size = 0, alpha=0.8) +
+              hjust=0, nudge_y =error_text_y_nudge, size=2.5, label.size = 0, alpha=0.8) +
+    geom_label(data=error_text_only, aes(x=r2_text_x_placement, label=r2_text), inherit.aes = TRUE,
+               hjust=0, nudge_y =r2_text_y_nudge, size=2.3, label.size = 0, alpha=0.8, parse=TRUE) +
     geom_vline(xintercept = 0, size=1) + 
     scale_color_brewer(palette = 'Dark2') + 
     xlim(x_lower_bound,x_upper_bound) + 
@@ -53,10 +56,12 @@ population_errors_text = population_errors %>%
   group_by(method, metric, sample_size, percent_yes) %>%
   summarise(median_error = round(median(error, na.rm = T),0),
             quantile_025_error = round(quantile(error, 0.025, na.rm = T),0),
-            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0)) %>%
+            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
+            R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')) %>%
-  select(method, metric, sample_size, percent_yes, error_text) 
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')'),
+         r2_text = paste0('R^2 == ',round(R2,2))) %>%
+  select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
 population_errors = population_errors %>%
   left_join(population_errors_text, by=c('metric','method','percent_yes','sample_size'))
@@ -76,15 +81,14 @@ population_errors = population_errors %>%
          percent_yes_display = paste('Percent Yes',percent_yes, sep = ' : '))
 population_errors$sample_size_display = forcats::fct_reorder(population_errors$sample_size_display, population_errors$sample_size)
 
-
-
-pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = 20)
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = 20, r2_text_x_placement = -45)
 ggsave(filename = 'manuscript/population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45)
+pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30)
 ggsave(filename = 'manuscript/population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6)
+pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
+                         r2_text_x_placement = 5)
 ggsave(filename = 'manuscript/population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
