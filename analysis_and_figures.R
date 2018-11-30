@@ -59,7 +59,7 @@ population_errors_text = population_errors %>%
             quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
             R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')'),
+  mutate(error_text = paste0(median_error,' (',quantile_975_error - quantile_025_error,')'),
          r2_text = paste0('R^2 == ',round(R2,2))) %>%
   select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
