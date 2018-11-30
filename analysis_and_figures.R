@@ -81,6 +81,15 @@ population_errors = population_errors %>%
          percent_yes_display = paste('Percent Yes',percent_yes, sep = ' : '))
 population_errors$sample_size_display = forcats::fct_reorder(population_errors$sample_size_display, population_errors$sample_size)
 
+############################
+percent_of_estimates_kept = population_errors %>%
+  group_by(method ,metric, sample_size, percent_yes) %>%
+  summarise(total_estimates = n()) %>%
+  ungroup() %>%
+  mutate(percent_kept = total_estimates/11000)
+
+############################
+# figures
 pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = 20, r2_text_x_placement = -45)
 ggsave(filename = 'manuscript/population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
@@ -93,7 +102,9 @@ ggsave(filename = 'manuscript/population_peak_errors.png', plot = pop_peak_plot,
 
 #############################################
 # Error plots for individual estiamtes
-individual_estimates = read_csv(individual_estimator_output_file) 
+individual_estimates = read_csv(individual_estimator_output_file) %>%
+  filter(metric!='peak')
+#TODO: peak estimates snuck in there from the gam estimate, remove it from the run_estimates file later
 
 individual_true_data = read_csv(individual_true_flowering_dates_file) %>%
   gather(metric, actual_doy, -year, -plant_id)
@@ -108,10 +119,12 @@ individual_errors_text = individual_errors %>%
   group_by(method, metric, sample_size, percent_yes) %>%
   summarise(median_error = round(median(error, na.rm = T),0),
             quantile_025_error = round(quantile(error, 0.025, na.rm = T),0),
-            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0)) %>%
+            quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
+            R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')')) %>%
-  select(method, metric, sample_size, percent_yes, error_text) 
+  mutate(error_text = paste0(median_error,' (',quantile_975_error - quantile_025_error,')'),
+         r2_text = paste0('R^2 == ',round(R2,2))) %>%
+  select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
 individual_errors = individual_errors %>%
   left_join(individual_errors_text, by=c('metric','method','percent_yes','sample_size'))
@@ -129,11 +142,10 @@ individual_errors = individual_errors %>%
 individual_errors$sample_size_display = forcats::fct_reorder(individual_errors$sample_size_display, individual_errors$sample_size)
 
 
-
-ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50)
+ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
 ggsave(filename = 'manuscript/individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50)
+ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30)
 ggsave(filename = 'manuscript/individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 
