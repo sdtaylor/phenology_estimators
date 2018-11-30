@@ -107,7 +107,7 @@ flowering_data_for_estimators = data.frame()
 
 for(this_sample_size in individual_sample_sizes){
   for(this_percent_yes in percent_yes){
-    for(bootstrap_i in 1:num_bootstraps){
+    for(bootstrap_i in 1:individual_num_bootstraps){
       for(this_year in unique(doy_data$year)){
           
         unique_plants_this_year = doy_data %>%

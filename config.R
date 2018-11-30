@@ -8,7 +8,9 @@
 
 # In the estimator script, each estimator will be applied to each permutation.
 
-num_bootstraps = 10
+population_num_bootstraps = 1000
+individual_num_bootstraps = 20
+
 percent_yes   = c(0.25, 0.5, 0.75)
 
 individual_sample_sizes  = c(10,15,20)

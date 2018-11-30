@@ -106,7 +106,7 @@ flowering_data_for_estimators = data.frame()
 for(this_year in unique(doy_data$year)){
   for(this_sample_size in population_sample_sizes){
     for(this_percent_yes in percent_yes){
-      for(bootstrap_i in 1:num_bootstraps){
+      for(bootstrap_i in 1:population_num_bootstraps){
         
         year_data = doy_data %>%
           filter(year == this_year) %>%

@@ -17,7 +17,7 @@ for(this_year in unique(flowering_data$year)){
   
   for(this_sample_size in individual_sample_sizes){
     for(this_percent_yes in percent_yes){
-      for(this_bootstrap in 1:num_bootstraps){
+      for(this_bootstrap in 1:individual_num_bootstraps){
         for(this_plant_id in unique_plants_this_year){
         
         data_subset = flowering_data %>%
