@@ -97,6 +97,8 @@ gam_estimate = function(fl, metric='onset'){
   } else if(metric=='all'){
     #return(list('onset' = onset_doy, 'peak' = peak_doy, 'end' = end_doy))
     return(c(onset_doy, peak_doy, end_doy))
+  } else if(metric=='all_doys'){
+    return(all_doys)
   } else {
     stop('Unknown metric type: ',metric)
   }
@@ -193,15 +195,21 @@ midway_population = function(fl, population_prior_no_threshold=Inf){
 # first doy which has a 50% probability of flowering (will also be the reflection point)
 ####################################################
 
-logistic_method = function(fl, probability_threshold=0.5){
+logistic_method = function(fl, probability_threshold=0.5, return_all_doys = FALSE){
   logistic_model = glm(flowering ~ doy, family = 'binomial', data=fl)
   all_doys = data.frame(doy = 1:366)
   all_doys$flowering_probability = predict(logistic_model, newdata = all_doys, type = 'response')
   
-  all_doys %>%
+  onset = all_doys %>%
     filter(flowering_probability >= probability_threshold) %>%
     pull(doy) %>%
     min()
+  
+  if(return_all_doys){
+    return(all_doys)
+  } else {
+    return(onset)
+  }
 }
 
 ###################################################
