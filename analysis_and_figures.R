@@ -43,6 +43,11 @@ get_plot = function(error_df, metric_to_plot,
 # Error plots for population estiamtes
 population_estimates = read_csv(population_estimator_output_file) 
 
+# Drop Mean Midway 7-Day with sample size of 10 cause over 99% of the estimates
+# were dropped and the final error is inflated.
+population_estimates = population_estimates %>%
+  filter(!(method=='mean_midway_7day' & sample_size==10))
+
 population_true_data = read_csv(population_true_flowering_dates_file) %>%
   gather(metric, actual_doy, -year)
 
