@@ -87,7 +87,7 @@ population_errors$method = forcats::fct_recode(population_errors$method, 'First 
 population_errors$method = fct_relevel(population_errors$method,'First Observed','Last Observed','GAM','Logistic','Mean Midway','Mean Midway 7-Day','Mean Flowering','Survival Curve','Weibull')
 
 population_errors = population_errors %>%
-  mutate(sample_size_display = paste0('Sample Size : ',sample_size, sep = ' : '),
+  mutate(sample_size_display = paste0('Sample Size : ',sample_size),
          percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
 population_errors$sample_size_display = forcats::fct_reorder(population_errors$sample_size_display, population_errors$sample_size)
 
