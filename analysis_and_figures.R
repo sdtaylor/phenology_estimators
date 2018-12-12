@@ -95,7 +95,7 @@ percent_of_estimates_kept = population_errors %>%
 
 ############################
 # figures
-pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = 20, r2_text_x_placement = -45)
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
 ggsave(filename = 'manuscript/population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30)
