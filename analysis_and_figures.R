@@ -72,18 +72,23 @@ population_errors = population_errors %>%
   left_join(population_errors_text, by=c('metric','method','percent_yes','sample_size'))
 
 # Nicer looking names for everything
+population_errors = population_errors %>%
+  mutate(method = ifelse((method=='first_observed' & metric=='end'), 'last_observed',method))
 population_errors$method = as.factor(population_errors$method)
 population_errors$method = forcats::fct_recode(population_errors$method, 'First Observed'='first_observed',
+                                                   'Last Observed'='last_observed',
                                                    'Mean Flowering' = 'mean_flowering',
                                                    'Survival Curve' = 'survival_curve_median',
                                                    'Mean Midway' = 'mean_midway',
                                                    'Mean Midway 7-Day' = "mean_midway_7day",
                                                    'Logistic' = 'logistic',
                                                    'GAM' = 'gam',
-                                                   'Weibull Curve' = 'pearse')
+                                                   'Weibull' = 'pearse')
+population_errors$method = fct_relevel(population_errors$method,'First Observed','Last Observed','GAM','Logistic','Mean Midway','Mean Midway 7-Day','Mean Flowering','Survival Curve','Weibull')
+
 population_errors = population_errors %>%
-  mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
-         percent_yes_display = paste('Percent Yes',percent_yes, sep = ' : '))
+  mutate(sample_size_display = paste0('Sample Size : ',sample_size, sep = ' : '),
+         percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
 population_errors$sample_size_display = forcats::fct_reorder(population_errors$sample_size_display, population_errors$sample_size)
 
 ############################
@@ -96,14 +101,14 @@ percent_of_estimates_kept = population_errors %>%
 ############################
 # figures
 pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
-ggsave(filename = 'manuscript/population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_1_population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30)
-ggsave(filename = 'manuscript/population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_2_population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
                          r2_text_x_placement = 5)
-ggsave(filename = 'manuscript/population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_3_population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
 # Error plots for individual estiamtes
@@ -134,23 +139,30 @@ individual_errors_text = individual_errors %>%
 individual_errors = individual_errors %>%
   left_join(individual_errors_text, by=c('metric','method','percent_yes','sample_size'))
 
+# nice names for the  figures
+individual_errors = individual_errors %>%
+  mutate(method = ifelse((method=='first_observed' & metric=='end'), 'last_observed',method))
+
 individual_errors$method = as.factor(individual_errors$method)
 individual_errors$method = forcats::fct_recode(individual_errors$method, 'First Observed'='first_observed',
+                                                                         'Last Observed'='last_observed',
                                                                          'Midway' = 'midway',
                                                                          'Midway 7-Day' = 'midway_7day',
                                                                          'Logistic' = 'logistic',
                                                                          'GAM' = 'gam',
-                                                                         'Weibull Curve' = 'pearse')
+                                                                         'Weibull' = 'pearse')
+individual_errors$method = fct_relevel(individual_errors$method,'First Observed','Last Observed','GAM','Logistic','Midway','Midway 7-Day','Weibull')
+
 individual_errors = individual_errors %>%
   mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
-         percent_yes_display = paste('Percent Yes',percent_yes, sep = ' : '))
+         percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
 individual_errors$sample_size_display = forcats::fct_reorder(individual_errors$sample_size_display, individual_errors$sample_size)
 
 
 ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
-ggsave(filename = 'manuscript/individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_4_individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30)
-ggsave(filename = 'manuscript/individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S3_individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 
