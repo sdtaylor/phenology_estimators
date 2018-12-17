@@ -77,18 +77,24 @@ select_years = c(2005,2010,2014)
 individual_data = original_data %>%
   group_by(year) %>%
   arrange(doy_start) %>%
-  mutate(plant_id = 1:n()) %>%
+  mutate(plant_id = seq(1, by=1.2, length.out = n())) %>%
   ungroup() %>%
   filter(year %in% select_years)
 
 ##############################################################################
 
-ggplot(filter(flower_counts, year %in% select_years), aes(x=doy, y=num_flowers)) +
-  geom_segment(data = individual_data, aes(x=doy_start, y=plant_id, xend=doy_end, yend=plant_id), size=0.8, color='grey40') + 
-  geom_point(color='black', shape=1, size=4, stroke=2) + 
+fl_distribution_fig = ggplot(filter(flower_counts, year %in% select_years), aes(x=doy, y=num_flowers)) +
+  geom_segment(data = individual_data, aes(x=doy_start, y=plant_id, xend=doy_end, yend=plant_id), size=0.3, color='grey20') + 
+  geom_point(color='black', shape=1, size=4, stroke=1.2) + 
   geom_line(size=1) + 
-  facet_wrap(~year) +
+  scale_x_continuous(breaks = c(180, 190, 200, 210)) + 
+  facet_wrap(~year, ncol=1) +
   theme_bw() +
+  theme(axis.text = element_text(size=12),
+        axis.title= element_text(size=14),
+        strip.text = element_text(size=14)) + 
   labs(y='Number of Flowering Individuals', x='Julian Day')
+
+ggsave(filename = 'manuscript/figs/fig_5_fl_distribution.png', plot = fl_distribution_fig, dpi = 600, height = 22, width = 10, units = 'cm')
 
 
