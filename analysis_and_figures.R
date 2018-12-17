@@ -5,7 +5,7 @@ source('config.R')
 #########################################
 library(ggridges)
 
-get_plot = function(error_df, metric_to_plot,
+get_plot = function(error_df, metric_to_plot, plot_title,
                     x_lower_bound=-50, x_upper_bound=50,
                     error_text_x_placement, error_text_y_nudge=0.5,
                     r2_text_x_placement, r2_text_y_nudge=0.5){
@@ -35,7 +35,8 @@ get_plot = function(error_df, metric_to_plot,
           strip.background = element_rect(fill='grey90', color='black'),
           text = element_text(family='Helvetica', face='plain', color='black')) + 
     labs(x='Error Distribution (Estimated DOY - True DOY)',
-         y='')
+         y='',
+         title=plot_title)
   return(p)
 }
 
@@ -64,7 +65,7 @@ population_errors_text = population_errors %>%
             quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
             R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_975_error - quantile_025_error,')'),
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')'),
          r2_text = paste0('R^2 == ',round(R2,2))) %>%
   select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
@@ -100,14 +101,14 @@ percent_of_estimates_kept = population_errors %>%
 
 ############################
 # figures
-pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Population Onset Errors')
 ggsave(filename = 'manuscript/figs/fig_1_population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30)
+pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30, plot_title = 'Population End Errors')
 ggsave(filename = 'manuscript/figs/fig_2_population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
-                         r2_text_x_placement = 5)
+                         r2_text_x_placement = 5, plot_title = 'Population Peak Errors')
 ggsave(filename = 'manuscript/figs/fig_3_population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
@@ -132,7 +133,7 @@ individual_errors_text = individual_errors %>%
             quantile_975_error= round(quantile(error, 0.975, na.rm = T),0),
             R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup() %>%
-  mutate(error_text = paste0(median_error,' (',quantile_975_error - quantile_025_error,')'),
+  mutate(error_text = paste0(median_error,' (',quantile_025_error,', ',quantile_975_error,')'),
          r2_text = paste0('R^2 == ',round(R2,2))) %>%
   select(method, metric, sample_size, percent_yes, error_text, r2_text) 
 
@@ -159,10 +160,10 @@ individual_errors = individual_errors %>%
 individual_errors$sample_size_display = forcats::fct_reorder(individual_errors$sample_size_display, individual_errors$sample_size)
 
 
-ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30)
+ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual Onset Errors')
 ggsave(filename = 'manuscript/figs/fig_4_individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30)
+ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual End Errors')
 ggsave(filename = 'manuscript/figs/fig_S3_individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 
