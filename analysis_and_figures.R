@@ -5,7 +5,7 @@ source('config.R')
 #########################################
 library(ggridges)
 
-get_plot = function(error_df, metric_to_plot, plot_title,
+get_plot = function(error_df, metric_to_plot, plot_title, arrow_details, arrow_nudge,
                     x_lower_bound=-50, x_upper_bound=50,
                     error_text_x_placement, error_text_y_nudge=0.5,
                     r2_text_x_placement, r2_text_y_nudge=0.5){
@@ -15,6 +15,14 @@ get_plot = function(error_df, metric_to_plot, plot_title,
     select(method, sample_size_display, percent_yes_display, error_text, r2_text) %>%
     distinct()
   
+  # While the exact x/y coordinates are a bit different between the figures
+  # these details are the same for all. 
+  arrow_details$y='Weibull'
+  arrow_details$yend='Weibull'
+  arrow_details$sample_size_display='Sample Size : 10'
+  arrow_details$percent_yes_display='Presence Percent : 50%'
+  
+
   p=ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
     geom_density_ridges(fill=NA, size=1.5, aes(color=method, height= ..density..),
                         stat='density',bw=1, panel_scaling=FALSE) + 
@@ -23,6 +31,9 @@ get_plot = function(error_df, metric_to_plot, plot_title,
     geom_label(data=error_text_only, aes(x=r2_text_x_placement, label=r2_text), inherit.aes = TRUE,
                hjust=0, nudge_y =r2_text_y_nudge, size=2.3, label.size = 0, alpha=0.8, parse=TRUE) +
     geom_vline(xintercept = 0, size=1) + 
+    geom_segment(data=arrow_details, aes(x=x,xend=xend, y=y,yend=yend), size=0.8,
+                 arrow = arrow(length = unit(0.25, 'cm')), position = position_nudge(y=arrow_nudge)) + 
+    geom_label(data=arrow_details, aes(x=text_x, y=y, label=text_label),size=2.5, position = position_nudge(y=arrow_nudge), label.size=0, alpha=0.8) + 
     scale_color_brewer(palette = 'Dark2') + 
     xlim(x_lower_bound,x_upper_bound) + 
     facet_wrap(sample_size_display~percent_yes_display) +
@@ -102,14 +113,29 @@ percent_of_estimates_kept = population_errors %>%
 
 ############################
 # figures
-pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Population Onset Errors')
+
+onset_end_arrows = tribble(
+  ~x, ~xend, ~text_x, ~text_label,
+  -5, -20, -39, 'Underestimate',
+  5,  20,   38, 'Overestimate'
+)
+
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Population Onset Errors',
+                          arrow_details = onset_end_arrows, arrow_nudge = 1.5)
 ggsave(filename = 'manuscript/figs/fig_1_population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30, plot_title = 'Population End Errors')
+pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30, plot_title = 'Population End Errors',
+                        arrow_details = onset_end_arrows, arrow_nudge = 1.5)
 ggsave(filename = 'manuscript/figs/fig_2_population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
+peak_arrows = tribble(
+  ~x, ~xend, ~text_x, ~text_label,
+  -1, -4, -8, 'Underestimate',
+  1,  4, 8, 'Overestimate'
+)
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
-                         r2_text_x_placement = 5, plot_title = 'Population Peak Errors')
+                         r2_text_x_placement = 5, plot_title = 'Population Peak Errors',
+                         arrow_details = peak_arrows, arrow_nudge = 0.4)
 ggsave(filename = 'manuscript/figs/fig_3_population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
@@ -160,11 +186,20 @@ individual_errors = individual_errors %>%
          percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
 individual_errors$sample_size_display = forcats::fct_reorder(individual_errors$sample_size_display, individual_errors$sample_size)
 
+###################################
 
-ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual Onset Errors')
+individual_arrows = tribble(
+  ~x, ~xend, ~text_x, ~text_label,
+  -2, -5, -8, 'Underestimate',
+  2,  5, 8, 'Overestimate'
+)
+
+ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual Onset Errors',
+                          arrow_details = onset_end_arrows, arrow_nudge = 1.2)
 ggsave(filename = 'manuscript/figs/fig_4_individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual End Errors')
+ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual End Errors',
+                        arrow_details = onset_end_arrows, arrow_nudge = 1.2)
 ggsave(filename = 'manuscript/figs/fig_S3_individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 
