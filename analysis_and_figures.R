@@ -15,8 +15,9 @@ get_plot = function(error_df, metric_to_plot, plot_title,
     select(method, sample_size_display, percent_yes_display, error_text, r2_text) %>%
     distinct()
   
-  p=  ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
-    geom_density_ridges(fill=NA, size=1.5, aes(color=method), panel_scaling=FALSE) + 
+  p=ggplot(filter(error_df, metric==metric_to_plot), aes(x=error, y=method)) + 
+    geom_density_ridges(fill=NA, size=1.5, aes(color=method, height= ..density..),
+                        stat='density',bw=1, panel_scaling=FALSE) + 
     geom_label(data=error_text_only, aes(x=error_text_x_placement, label=error_text), inherit.aes = TRUE,
               hjust=0, nudge_y =error_text_y_nudge, size=2.5, label.size = 0, alpha=0.8) +
     geom_label(data=error_text_only, aes(x=r2_text_x_placement, label=r2_text), inherit.aes = TRUE,
