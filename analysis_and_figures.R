@@ -19,7 +19,7 @@ get_plot = function(error_df, metric_to_plot, plot_title, arrow_details, arrow_n
   # these details are the same for all. 
   arrow_details$y='Weibull'
   arrow_details$yend='Weibull'
-  arrow_details$sample_size_display='Sample Size : 10'
+  #arrow_details$sample_size_display='Sample Size : 10'
   arrow_details$percent_yes_display='Presence Percent : 50%'
   
 
@@ -119,6 +119,9 @@ onset_end_arrows = tribble(
   -5, -20, -39, 'Underestimate',
   5,  20,   38, 'Overestimate'
 )
+# Need to set this ordering or else it fudges the final panel ordering
+onset_end_arrows$sample_size_display = 'Sample Size : 10'
+onset_end_arrows$sample_size_display = factor(onset_end_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
 
 pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Population Onset Errors',
                           arrow_details = onset_end_arrows, arrow_nudge = 1.5)
@@ -133,6 +136,9 @@ peak_arrows = tribble(
   -1, -4, -8, 'Underestimate',
   1,  4, 8, 'Overestimate'
 )
+peak_arrows$sample_size_display = 'Sample Size : 10'
+peak_arrows$sample_size_display = factor(peak_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
+
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
                          r2_text_x_placement = 5, plot_title = 'Population Peak Errors',
                          arrow_details = peak_arrows, arrow_nudge = 0.4)
@@ -193,6 +199,8 @@ individual_arrows = tribble(
   -2, -5, -8, 'Underestimate',
   2,  5, 8, 'Overestimate'
 )
+individual_arrows$sample_size_display = 'Sample Size : 10'
+individual_arrows$sample_size_display = factor(individual_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
 
 ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual Onset Errors',
                           arrow_details = onset_end_arrows, arrow_nudge = 1.2)
