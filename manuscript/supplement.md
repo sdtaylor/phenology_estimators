@@ -2,8 +2,8 @@
 csl: csl.csl
 output:
   pdf_document:
-    keep_tex: true
-  html_document: default
+    keep_tex: false
+  html_document: false
 geometry: left=3.5cm, right=3.5cm, top=2.25cm, bottom=2.25cm, headheight=12pt, letterpaper
 header-includes:
 - \usepackage{times}
