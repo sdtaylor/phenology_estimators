@@ -158,7 +158,7 @@ While this study focused on plants, the same methods can be applied to status-ba
 In summary I have used a precise flowering phenology dataset to confirm that naively using the first flowering observation is biased, and estimates using the mean flowering reliable for estimating flowering peak. I have also shown how the recently introduced Weibull method can produce reliable estimates given an adequate sample size, and that the Logistic and GAM methods can be used when the total sample size is high but actual flowering presence observations are low. Additionally, estimating transition dates of individual plants is best done with the Midway method using a 7 day restriction, and the Weibull method if the restriction results in a low number of final samples. These estimators are needed for translating status-based phenology data into distinct transition dates, which are vital for tracking changing dynamics of seasonal patterns.
 
 # Acknowledgements
-This research was supported by the Gordon and Betty Moore Foundation’s Data-Driven Discovery Initiative through Grant GBMF4563 to Ethan P. White. I thank Amy Waananen and the team of the Echinacea Project ([http://echinaceaproject.org/](http://echinaceaproject.org/)) for providing the phenology data set. I thank Amy Waananen and Janet Prevéy for providing feedback on early versions of the manuscript.
+I thank Amy Waananen and the team of the Echinacea Project ([http://echinaceaproject.org/](http://echinaceaproject.org/)) for providing the phenology data set. I thank Amy Waananen and Janet Prevéy for providing feedback on early versions of the manuscript.
 
 # References
 
