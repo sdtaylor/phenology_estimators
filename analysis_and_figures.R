@@ -123,11 +123,11 @@ onset_end_arrows = tribble(
 onset_end_arrows$sample_size_display = 'Sample Size : 10'
 onset_end_arrows$sample_size_display = factor(onset_end_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
 
-pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Population Onset Errors',
+pop_onset_plot = get_plot(population_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = '',
                           arrow_details = onset_end_arrows, arrow_nudge = 1.5)
 ggsave(filename = 'manuscript/figs/fig_1_population_onset_errors.png', plot = pop_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30, plot_title = 'Population End Errors',
+pop_end_plot = get_plot(population_errors, 'end', error_text_x_placement = -50, error_text_y_nudge = 0.45, r2_text_x_placement = 30, plot_title = '',
                         arrow_details = onset_end_arrows, arrow_nudge = 1.5)
 ggsave(filename = 'manuscript/figs/fig_2_population_end_errors.png', plot = pop_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
@@ -140,7 +140,7 @@ peak_arrows$sample_size_display = 'Sample Size : 10'
 peak_arrows$sample_size_display = factor(peak_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
 
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
-                         r2_text_x_placement = 5, plot_title = 'Population Peak Errors',
+                         r2_text_x_placement = 5, plot_title = '',
                          arrow_details = peak_arrows, arrow_nudge = 0.4)
 ggsave(filename = 'manuscript/figs/fig_3_population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
@@ -202,11 +202,11 @@ individual_arrows = tribble(
 individual_arrows$sample_size_display = 'Sample Size : 10'
 individual_arrows$sample_size_display = factor(individual_arrows$sample_size_display, levels=c("Sample Size : 10","Sample Size : 50","Sample Size : 100"),ordered=TRUE)
 
-ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual Onset Errors',
+ind_onset_plot = get_plot(individual_errors, 'onset', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = '',
                           arrow_details = onset_end_arrows, arrow_nudge = 1.2)
 ggsave(filename = 'manuscript/figs/fig_4_individual_onset_errors.png', plot = ind_onset_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
-ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = 'Individual End Errors',
+ind_end_plot = get_plot(individual_errors, 'end', error_text_x_placement = -50, r2_text_x_placement = 30, plot_title = '',
                         arrow_details = onset_end_arrows, arrow_nudge = 1.2)
 ggsave(filename = 'manuscript/figs/fig_S3_individual_end_errors.png', plot = ind_end_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
