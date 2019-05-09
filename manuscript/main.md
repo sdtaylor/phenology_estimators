@@ -71,7 +71,7 @@ The Survival method uses a Kaplanâ€“Meier model to estimate the median date of â
 
 Finally, the mean flowering method uses the average Julian day of all flowering presence observations. This was used to estimate peak flowering in the population analysis. 
 
-All analysis was done using the R programming language (Version 3.4, -@rcitation). Packages used during the analysis included dplyr [@dplyr], tidyr [@tidyr], ggplot2 [@ggplot2], mgcv [@mgcvGAM; @mgcvTP], survival [@Rsurvival], testthat [@testthat], ggridges [@ggridges], and lubridate [@lubridate].
+All analysis was done using the R programming language [version 3.4.4, @rcitation]. Packages used during the analysis included dplyr [version 0.8.0.1, @dplyr], tidyr [version 0.8.3, @tidyr], ggplot2 [version 3.1.1, @ggplot2], mgcv [version 1.8.28, @mgcvGAM; @mgcvTP], survival [version 2.43.3, @Rsurvival], testthat [version 2.1.1, @testthat], ggridges [version 0.5.1, @ggridges], and lubridate [version 1.7.4, @lubridate].
 
 \newpage
 
