@@ -1,5 +1,6 @@
 library(tidyverse)
 library(lubridate)
+library(progress)
 
 source('config.R')
 
@@ -103,10 +104,18 @@ write_csv(flowering_true_dates, population_true_flowering_dates_file)
 
 flowering_data_for_estimators = data.frame()
 
+# setup progress bar
+iteration_count = length(population_sample_sizes) * length(percent_yes) * population_num_bootstraps * length(unique(doy_data$year))
+pb = progress_bar$new(total = iteration_count)
+
+print('Initial data formatting for population level analysis')
+
 for(this_year in unique(doy_data$year)){
   for(this_sample_size in population_sample_sizes){
     for(this_percent_yes in percent_yes){
       for(bootstrap_i in 1:population_num_bootstraps){
+        
+        pb$tick()
         
         year_data = doy_data %>%
           filter(year == this_year) %>%

@@ -1,4 +1,5 @@
 library(tidyverse)
+library(progress)
 
 source('config.R')
 source('estimators.R')
@@ -9,6 +10,12 @@ flowering_data = read_csv(individual_data_for_estimators_file)
 
 all_estimates = data.frame()
 
+# setup progress bar
+iteration_count = length(individual_sample_sizes) * length(percent_yes) * individual_num_bootstraps * length(unique(flowering_data$year))
+pb = progress_bar$new(total = iteration_count)
+
+print('Running estimators for individual level analysis')
+
 for(this_year in unique(flowering_data$year)){
   unique_plants_this_year = flowering_data %>%
     filter(year == this_year) %>%
@@ -18,6 +25,9 @@ for(this_year in unique(flowering_data$year)){
   for(this_sample_size in individual_sample_sizes){
     for(this_percent_yes in percent_yes){
       for(this_bootstrap in 1:individual_num_bootstraps){
+        
+        pb$tick()
+        
         for(this_plant_id in unique_plants_this_year){
         
         data_subset = flowering_data %>%

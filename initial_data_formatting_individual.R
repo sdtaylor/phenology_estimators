@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(testthat)
+library(progress)
 
 source('config.R')
 
@@ -105,11 +106,19 @@ doy_data = doy_data %>%
 
 flowering_data_for_estimators = data.frame()
 
+# setup progress bar
+iteration_count = length(individual_sample_sizes) * length(percent_yes) * individual_num_bootstraps * length(unique(doy_data$year))
+pb = progress_bar$new(total = iteration_count)
+
+print('Initial data formatting for individual level analysis')
+
 for(this_sample_size in individual_sample_sizes){
   for(this_percent_yes in percent_yes){
     for(bootstrap_i in 1:individual_num_bootstraps){
       for(this_year in unique(doy_data$year)){
-          
+        
+        pb$tick()
+        
         unique_plants_this_year = doy_data %>%
           filter(year == this_year) %>%
           pull(plant_id) %>%

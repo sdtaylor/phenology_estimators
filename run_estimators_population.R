@@ -1,4 +1,5 @@
 library(tidyverse)
+library(progress)
 
 source('config.R')
 source('estimators.R')
@@ -9,10 +10,18 @@ flowering_data = read_csv(population_data_for_estimators_file)
 
 all_estimates = data.frame()
 
+# setup progress bar
+iteration_count = length(population_sample_sizes) * length(percent_yes) * population_num_bootstraps * length(unique(flowering_data$year))
+pb = progress_bar$new(total = iteration_count)
+
+print('Running estimators for population level analysis')
+
 for(this_year in unique(flowering_data$year)){
   for(this_sample_size in population_sample_sizes){
     for(this_percent_yes in percent_yes){
       for(this_bootstrap in 1:population_num_bootstraps){
+        
+        pb$tick()
         
         data_subset = flowering_data %>%
           filter(year == this_year,
