@@ -16,9 +16,14 @@ get_plot = function(error_df, metric_to_plot, plot_title, arrow_details, arrow_n
     distinct()
   
   # While the exact x/y coordinates are a bit different between the figures
-  # these details are the same for all. 
-  arrow_details$y='Weibull'
-  arrow_details$yend='Weibull'
+  # these details are the same for all except the Peak figure.
+  if(metric_to_plot=='peak'){
+    arrow_details$y='Survival Curve'
+    arrow_details$yend='Survival Curve'
+  } else {
+    arrow_details$y='Weibull'
+    arrow_details$yend='Weibull'
+  }
   #arrow_details$sample_size_display='Sample Size : 10'
   arrow_details$percent_yes_display='Presence Percent : 50%'
   
@@ -141,7 +146,7 @@ peak_arrows$sample_size_display = factor(peak_arrows$sample_size_display, levels
 
 pop_peak_plot = get_plot(population_errors, 'peak', x_lower_bound = -10, x_upper_bound = 10, error_text_x_placement = -9, error_text_y_nudge = 0.6,
                          r2_text_x_placement = 5, plot_title = '',
-                         arrow_details = peak_arrows, arrow_nudge = 0.4)
+                         arrow_details = peak_arrows, arrow_nudge = 1.5)
 ggsave(filename = 'manuscript/figs/fig_3_population_peak_errors.png', plot = pop_peak_plot, dpi = 600, height = 20, width = 22, units = 'cm')
 
 #############################################
