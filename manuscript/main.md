@@ -109,13 +109,13 @@ The end of flowering for the entire population was more difficult to estimate th
 
 With a sample size of 10 and presence proportion of 25% the last observed method had the highest R\textsuperscript{2}, but still underestimated the end date of flowering by 17 days the majority of the time (Fig. 2). The Midway method, both with and without the 7-day restriction, were never the best performing estimators. Without the 7-day restriction the method consistently overestimated the end date. With the 7-day restriction the method consistently underestimated the end date. Neither Midway method improved with either increasing sample size or increasing proportion of flowering presence. As in the population onset the results from the Mean Midway 7-Day method were excluded due to less than 1% of estimates being usable, and the GAM method had a low proportion (27-81%) of usable estimates with a sample size of 10 (Fig. S1).
 
-![The error distribution of all estimators for population end, otherwise as in Fig. 1](figs/fig_2_population_end_errors.png)
+![The error distribution of all estimators for population end. The density curves are each derived from 11,000 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_2_population_end_errors.png)
 
 ## Population Peak Estimates
 
 All three methods to estimate peak flowering had median error rates of 1 day except in one instance, using the GAM method for a sample size of 10 and proportion of flower presence 75% (Fig. 3). The Mean Flowering method had the highest R\textsuperscript{2} in all scenarios except two where it had R\textsuperscript{2} equal to the Survival Curve method. For the Mean and Survival Curve methods, errors improved with both increasing sample size and increasing proportion of flowering presence. For the GAM method errors improved with increasing sample size, but worsened with increasing proportion of flowering presence. 
 
-![The error distribution of all estimators for population peak, otherwise as in Fig. 1](figs/fig_3_population_peak_errors.png)
+![The error distribution of all estimators for population peak. The density curves are each derived from 11,000 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_3_population_peak_errors.png)
 
 ## Individual Onset and End Estimates
 
@@ -125,7 +125,7 @@ The Weibull, Midway, Logistic, and GAM methods never produced the best estimate 
 
 The errors from individual end estimates were nearly identical to individual onset errors, thus the model performance outcomes were the same. Individual end errors are supplied in the supplement (Fig. S3). 
 
-![The error distribution of all estimators for individual onset, otherwise as in Fig. 1](figs/fig_4_individual_onset_errors.png)
+![The error distribution of all estimators for individual onset. The density curves are each derived from 2420 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data for 286 individual plants. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_4_individual_onset_errors.png)
 
 # Discussion
 
