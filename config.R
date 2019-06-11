@@ -28,6 +28,10 @@ population_true_flowering_dates_file = 'derived_data/population_true_flowering_d
 population_estimator_output_file = 'derived_data/population_results_from_estimators.csv'
 
 #################
+population_gam_logistic_threshold_results_file = 'derived_data/population_gam_logistic_threshold_results.csv'
+individual_gam_logistic_threshold_results_file = 'derived_data/individual_gam_logistic_threshold_results.csv'
+
+#################
 population_onset_estimators = c('first_observed','mean_midway','mean_midway_7day','logistic','pearse')
 population_end_estimators = c('first_observed','mean_midway','mean_midway_7day','logistic','pearse')
 population_peak_estimators  = c('survival_curve_median','mean_flowering')
