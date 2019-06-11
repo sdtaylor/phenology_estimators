@@ -387,19 +387,19 @@ individual_flowering_estimates = function(fl, estimator_name, flowering_metric){
       return(midway_individual(fl, prior_no_threshold=7))
       
     } else if(estimator_name=='logistic5'){
-      return(logistic_method(fl, probability_threshold = 0.05))
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'onset'))
       
     } else if(estimator_name=='logistic25'){
-      return(logistic_method(fl, probability_threshold = 0.25))
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'onset'))
       
     } else if(estimator_name=='logistic50'){
-      return(logistic_method(fl, probability_threshold = 0.5))
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'onset'))
       
     } else if(estimator_name=='logistic75'){
-      return(logistic_method(fl, probability_threshold = 0.75))
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'onset'))
       
     } else if(estimator_name=='logistic95'){
-      return(logistic_method(fl, probability_threshold = 0.95))
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'onset'))
       
     } else if(estimator_name=='pearse'){
       return(pearse_method(fl))
@@ -424,27 +424,19 @@ individual_flowering_estimates = function(fl, estimator_name, flowering_metric){
       return(midway_individual(fl, prior_no_threshold=7) * -1)
       
     } else if(estimator_name=='logistic5'){
-      #swap the flowering so 0=1 and 1=0
-      #for the end of flowering estimate using
-      #logistic regression
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl, probability_threshold = 0.05))
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'end'))
       
     } else if(estimator_name=='logistic25'){
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl, probability_threshold = 0.25))
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'end'))
       
     } else if(estimator_name=='logistic50'){
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl, probability_threshold = 0.5))
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'end'))
       
     } else if(estimator_name=='logistic75'){
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl, probability_threshold = 0.75))
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'end'))
       
     } else if(estimator_name=='logistic95'){
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl, probability_threshold = 0.95))
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'end'))
       
     } else if(estimator_name=='pearse'){
       #transpose flowering dates to negative
