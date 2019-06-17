@@ -32,18 +32,18 @@ population_gam_logistic_threshold_results_file = 'derived_data/population_gam_lo
 
 #################
 population_onset_estimators = c('first_observed','mean_midway','mean_midway_7day','pearse',
-                                'logostic5','logistic25','logostic50','logostic75','logostic95'
+                                'logistic5','logistic25','logistic50','logistic75','logistic95'
                               )
 population_end_estimators =   c('first_observed','mean_midway','mean_midway_7day','pearse',
-                                'logostic5','logistic25','logostic50','logostic75','logostic95'
+                                'logistic5','logistic25','logistic50','logistic75','logistic95'
                               )
 population_peak_estimators  = c('survival_curve_median','mean_flowering')
 
 individual_onset_estimators = c('first_observed','midway','midway_7day','pearse',
-                                'logostic5','logistic25','logostic50','logostic75','logostic95'
+                                'logistic5','logistic25','logistic50','logistic75','logistic95'
                               )
 individual_end_estimators =   c('first_observed','midway','midway_7day','pearse',
-                                'logostic5','logistic25','logostic50','logostic75','logostic95'
+                                'logistic5','logistic25','logistic50','logistic75','logistic95'
                               )
 
 # GAM models are done slightly differently, so only the potential thresholds
