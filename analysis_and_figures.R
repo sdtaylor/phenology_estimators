@@ -57,6 +57,46 @@ get_plot = function(error_df, metric_to_plot, plot_title, arrow_details, arrow_n
   return(p)
 }
 
+
+subset_to_best_thresholds = function(errors){
+  # The GAM and Logistic models are run with multiple probability thresholds. This subsets them to 
+  # a single best one for all sample_size/percent_yes/metric combinations. For all other methods 
+  # results are unaffected.
+  
+  # extract the threshold value from the gam/logistic method name
+  errors = errors %>%
+    tidyr::extract(method, c('method', 'threshold'), regex="(\\D+)(\\d+|$)", convert=T) %>%
+    mutate(threshold = threshold/100) %>%
+    mutate(threshold = replace_na(threshold, 100)) # non-gam/logistic models get a number so they are kept
+  
+  r2_values =  errors %>%
+    group_by(method, threshold, metric, sample_size, percent_yes) %>%
+    summarise(R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
+    ungroup() 
+  
+  to_keep = r2_values %>%
+    group_by(method, metric, sample_size, percent_yes) %>%
+    top_n(1,R2) %>%
+    ungroup() %>%
+    mutate(keep='yes')
+  
+  # Estimating peaks with gams are not affected by probabilites, so in these cases just pick one
+  # since the R2 values are all the same.
+  to_keep = to_keep %>%
+    mutate(keep = case_when(
+      method=='gam' & threshold==0.5 & metric=='peak' ~ keep,
+      method=='gam' & metric=='peak' ~ 'no',
+      TRUE ~ 'yes'
+    ))
+  
+  subset_errors = errors %>% 
+    left_join(to_keep, by=c('method','threshold','metric','sample_size','percent_yes')) %>%
+    filter(keep=='yes') %>%
+    select(-keep, -R2)
+
+  return(subset_errors)
+}
+
 #############################################
 # Error plots for population estiamtes
 population_estimates = read_csv(population_estimator_output_file) 
@@ -72,7 +112,9 @@ population_true_data = read_csv(population_true_flowering_dates_file) %>%
 population_errors = population_estimates %>%
   filter(!is.na(estimate), is.finite(estimate)) %>%
   left_join(population_true_data, by=c('year','metric')) %>%
-  mutate(error = estimate - actual_doy)
+  mutate(error = estimate - actual_doy) %>%
+  mutate(method = str_replace(method, 'mean_midway_7day','mean_midway_seven_day')) %>% # get the number outa this so the regex works.
+  subset_to_best_thresholds()
 
 # Calculate the median and CI's of density curves in the plots
 population_errors_text = population_errors %>%
@@ -98,7 +140,7 @@ population_errors$method = forcats::fct_recode(population_errors$method, 'First 
                                                    'Mean Flowering' = 'mean_flowering',
                                                    'Survival Curve' = 'survival_curve_median',
                                                    'Mean Midway' = 'mean_midway',
-                                                   'Mean Midway 7-Day' = "mean_midway_7day",
+                                                   'Mean Midway 7-Day' = "mean_midway_seven_day",
                                                    'Logistic' = 'logistic',
                                                    'GAM' = 'gam',
                                                    'Weibull' = 'pearse')
@@ -161,7 +203,9 @@ individual_true_data = read_csv(individual_true_flowering_dates_file) %>%
 individual_errors = individual_estimates %>%
   filter(!is.na(estimate), is.finite(estimate)) %>%
   left_join(individual_true_data, by=c('year','metric','plant_id')) %>%
-  mutate(error = estimate - actual_doy)
+  mutate(error = estimate - actual_doy) %>%
+  mutate(method = str_replace(method, 'midway_7day','midway_seven_day')) %>% # get the number outa this so the regex works.
+  subset_to_best_thresholds()
 
 # Calculate the median and CI's of density curves in the plots
 individual_errors_text = individual_errors %>%
@@ -186,7 +230,7 @@ individual_errors$method = as.factor(individual_errors$method)
 individual_errors$method = forcats::fct_recode(individual_errors$method, 'First Observed'='first_observed',
                                                                          'Last Observed'='last_observed',
                                                                          'Midway' = 'midway',
-                                                                         'Midway 7-Day' = 'midway_7day',
+                                                                         'Midway 7-Day' = 'midway_seven_day',
                                                                          'Logistic' = 'logistic',
                                                                          'GAM' = 'gam',
                                                                          'Weibull' = 'pearse')

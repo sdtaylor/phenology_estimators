@@ -7,6 +7,14 @@ source('config.R')
 ###########################
 population_estimates = read_csv(population_estimator_output_file) 
 
+# Use only a single threshold for gam/logistic since this result is the same
+# for all of them. 
+population_estimates = population_estimates %>%
+  mutate(method = str_replace(method, 'mean_midway_7day','mean_midway_seven_day')) %>% # get the number outa this so the regex works.
+  tidyr::extract(method, c('method', 'threshold'), regex="(\\D+)(\\d+|$)", convert=T) %>%
+  filter((!method %in% c('gam','logistic')) | (method %in% c('gam','logistic') & threshold==50)) %>%
+  select(-threshold)
+
 population_proportion_of_samples_kept = population_estimates %>%
   group_by(method, metric, sample_size, percent_yes) %>%
   summarise(n=n(), non_na = sum(!is.na(estimate))) %>%
@@ -33,7 +41,7 @@ population_proportion_of_samples_kept$method = forcats::fct_recode(population_pr
                                                'Mean Flowering' = 'mean_flowering',
                                                'Survival Curve' = 'survival_curve_median',
                                                'Mean Midway' = 'mean_midway',
-                                               'Mean Midway 7-Day' = "mean_midway_7day",
+                                               'Mean Midway 7-Day' = "mean_midway_seven_day",
                                                'Logistic' = 'logistic',
                                                'GAM' = 'gam',
                                                'Weibull' = 'pearse')
@@ -62,11 +70,19 @@ ggsave(filename = 'manuscript/figs/fig_S1_population_percent_kept.png', plot = p
 individual_estimates = read_csv(individual_estimator_output_file) %>%
   filter(metric!='peak')
 
+# Use only a single threshold for gam/logistic since this result is the same
+# for all of them. 
+individual_estimates = individual_estimates %>%
+  mutate(method = str_replace(method, 'midway_7day','midway_seven_day')) %>% # get the number outa this so the regex works.
+  tidyr::extract(method, c('method', 'threshold'), regex="(\\D+)(\\d+|$)", convert=T) %>%
+  filter((!method %in% c('gam','logistic')) | (method %in% c('gam','logistic') & threshold==50)) %>%
+  select(-threshold)
+
 individual_proportion_of_samples_kept = individual_estimates %>%
   group_by(method, metric, sample_size, percent_yes) %>%
   summarise(n=n(), non_na = sum(!is.na(estimate))) %>%
   ungroup() %>%
-  mutate(percent_kept = round(non_na / 2420, 2))
+  mutate(percent_kept = round(non_na / 4840, 2))
 
 ###################
 # Define positioning for the labels on top of the bar graph
@@ -85,7 +101,7 @@ individual_proportion_of_samples_kept = individual_proportion_of_samples_kept %>
 individual_proportion_of_samples_kept$method = as.factor(individual_proportion_of_samples_kept$method)
 individual_proportion_of_samples_kept$method = forcats::fct_recode(individual_proportion_of_samples_kept$method, 'First/Last Observed'='first_observed',
                                                                    'Midway' = 'midway',
-                                                                   'Midway 7-Day' = "midway_7day",
+                                                                   'Midway 7-Day' = "midway_seven_day",
                                                                    'Logistic' = 'logistic',
                                                                    'GAM' = 'gam',
                                                                    'Weibull' = 'pearse')

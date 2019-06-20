@@ -58,12 +58,16 @@ for(this_year in unique(flowering_data$year)){
                                  'estimate' = estimate))
         }
         
-        # GAM estimates. These are run separetly from the others since gam models the entire phenology jointly
-        subset_estimates = subset_estimates %>%
-          bind_rows(data.frame(method = 'gam',
-                               metric = c('onset','peak','end'),
-                               estimate = gam_estimate(data_subset, metric='all')))
         
+        # GAM estimates. These are run separetly from the others since gam models the entire phenology jointly
+        for(threshold in gam_thresholds){
+          subset_estimates = subset_estimates %>%
+            bind_rows(data.frame(method = paste0('gam',threshold*100),
+                                 metric = c('onset','peak','end'),
+                                 estimate = gam_estimate(data_subset, metric='all', probaility_threshold = threshold)))
+          
+        }
+
         subset_estimates$year = this_year
         subset_estimates$sample_size = this_sample_size
         subset_estimates$percent_yes = this_percent_yes

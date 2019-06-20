@@ -64,11 +64,11 @@ drop_zeros = function(fl, type_to_drop='leading'){
 #
 # This draws a logistic smoother over the entire year
 # peak: the maximum probability of flower
-# onset: first doy prior to peak where flowering is >= 0.01
-# end: last doy after peak where flowering is <= 0.01
+# onset: first doy prior to peak where flowering is >= threshold
+# end: last doy after peak where flowering is <= threshold
 ####################################################
 
-gam_estimate = function(fl, metric='onset'){
+gam_estimate = function(fl, metric='onset', probaility_threshold){
   gam_model = tryCatch({mgcv::gam(flowering ~ s(doy), family=binomial, data=fl)},
                         error = function(x){return(NA)})
 
@@ -76,15 +76,15 @@ gam_estimate = function(fl, metric='onset'){
     return(NA)
     }
   
-  all_doys = data.frame(doy = 1:366)
+  all_doys = data.frame(doy = 1:365)
   all_doys$flowering_probability = predict(gam_model, newdata = all_doys, type = 'response')
   peak_doy = all_doys$doy[which.max(all_doys$flowering_probability)]
   onset_doy = all_doys %>%
-    filter(doy <= peak_doy, flowering_probability >= 0.01) %>%
+    filter(doy <= peak_doy, flowering_probability >= probaility_threshold) %>%
     pull(doy) %>%
     min()
   end_doy = all_doys %>%
-    filter(doy >= peak_doy, flowering_probability <= 0.01) %>%
+    filter(doy >= peak_doy, flowering_probability <= probaility_threshold) %>%
     pull(doy) %>%
     min()
   
@@ -192,23 +192,31 @@ midway_population = function(fl, population_prior_no_threshold=Inf){
 # Logistic Regression
 #
 # Do a logistic regression of flowering ~ doy, and use the 
-# first doy which has a 50% probability of flowering (will also be the reflection point)
+# first doy which has a 50% probability of flowering (will also be the inflection point)
 ####################################################
 
-logistic_method = function(fl, probability_threshold=0.5, return_all_doys = FALSE){
+logistic_method = function(fl, probability_threshold, metric, return_all_doys = FALSE){
   logistic_model = glm(flowering ~ doy, family = 'binomial', data=fl)
-  all_doys = data.frame(doy = 1:366)
+  all_doys = data.frame(doy = 1:365)
   all_doys$flowering_probability = predict(logistic_model, newdata = all_doys, type = 'response')
   
-  onset = all_doys %>%
-    filter(flowering_probability >= probability_threshold) %>%
-    pull(doy) %>%
-    min()
+  if(metric=='onset'){
+    estimate = all_doys %>%
+      filter(flowering_probability >= probability_threshold) %>%
+      pull(doy) %>%
+      min()
+  } else if(metric == 'end'){
+    estimate = all_doys %>%
+      filter(flowering_probability <= probability_threshold) %>%
+      pull(doy) %>%
+      min()
+  }
+
   
   if(return_all_doys){
     return(all_doys)
   } else {
-    return(onset)
+    return(estimate)
   }
 }
 
@@ -278,23 +286,37 @@ population_flowering_estimates = function(fl, estimator_name, flowering_metric){
   #Onset estimators
   if(flowering_metric == 'onset'){
     fl = drop_zeros(fl, type_to_drop = 'trailing')
-      
+    
     if(estimator_name=='first_observed'){
       return(first_observed(fl))
     } else if(estimator_name=='mean_midway'){
       return(midway_population(fl))
     } else if(estimator_name=='mean_midway_7day'){
       return(midway_population(fl, population_prior_no_threshold=7))
-    } else if(estimator_name=='logistic'){
-      return(logistic_method(fl))
+      
+    } else if(estimator_name=='logistic5'){
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic25'){
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic50'){
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic75'){
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic95'){
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'onset'))
+      
     } else if(estimator_name=='pearse'){
       return(pearse_method(fl))
     } else {
       stop('Unknown estimator name for onset ',estimator_name)
     }
-
-  #####
-  #End estimators
+    
+    #####
+    #End estimators
   } else if(flowering_metric == 'end'){
     fl = drop_zeros(fl, type_to_drop = 'leading')
     
@@ -309,12 +331,21 @@ population_flowering_estimates = function(fl, estimator_name, flowering_metric){
       fl$doy = fl$doy * -1
       return(midway_population(fl, population_prior_no_threshold=7) * -1)
       
-    } else if(estimator_name=='logistic'){
-      #swap the flowering so 0=1 and 1=0
-      #for the end of flowering estimate using
-      #logistic regression
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl))
+    } else if(estimator_name=='logistic5'){
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'end'))
+      
+    } else if(estimator_name=='logistic25'){
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'end'))
+      
+    } else if(estimator_name=='logistic50'){
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'end'))
+      
+    } else if(estimator_name=='logistic75'){
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'end'))
+      
+    } else if(estimator_name=='logistic95'){
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'end'))
+      
     } else if(estimator_name=='pearse'){
       #transpose flowering dates to negative
       #to estimate the end of flowering
@@ -325,8 +356,8 @@ population_flowering_estimates = function(fl, estimator_name, flowering_metric){
       stop('Unknown estimator name for end of flowering ',estimator_name)
     }
     
-  #####
-  #Peak estimators
+    #####
+    #Peak estimators
   } else if(flowering_metric == 'peak'){
     
     if(estimator_name=='survival_curve_median'){
@@ -349,14 +380,27 @@ individual_flowering_estimates = function(fl, estimator_name, flowering_metric){
     
     if(estimator_name=='first_observed'){
       return(first_observed(fl))
-
+      
     } else if(estimator_name=='midway'){
       return(midway_individual(fl))
     } else if(estimator_name=='midway_7day'){
       return(midway_individual(fl, prior_no_threshold=7))
       
-    } else if(estimator_name=='logistic'){
-      return(logistic_method(fl))
+    } else if(estimator_name=='logistic5'){
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic25'){
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic50'){
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic75'){
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'onset'))
+      
+    } else if(estimator_name=='logistic95'){
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'onset'))
+      
     } else if(estimator_name=='pearse'){
       return(pearse_method(fl))
     } else {
@@ -379,12 +423,21 @@ individual_flowering_estimates = function(fl, estimator_name, flowering_metric){
       fl$doy = fl$doy * -1
       return(midway_individual(fl, prior_no_threshold=7) * -1)
       
-    } else if(estimator_name=='logistic'){
-      #swap the flowering so 0=1 and 1=0
-      #for the end of flowering estimate using
-      #logistic regression
-      fl$flowering = abs(fl$flowering - 1)
-      return(logistic_method(fl))
+    } else if(estimator_name=='logistic5'){
+      return(logistic_method(fl, probability_threshold = 0.05, metric = 'end'))
+      
+    } else if(estimator_name=='logistic25'){
+      return(logistic_method(fl, probability_threshold = 0.25, metric = 'end'))
+      
+    } else if(estimator_name=='logistic50'){
+      return(logistic_method(fl, probability_threshold = 0.5, metric = 'end'))
+      
+    } else if(estimator_name=='logistic75'){
+      return(logistic_method(fl, probability_threshold = 0.75, metric = 'end'))
+      
+    } else if(estimator_name=='logistic95'){
+      return(logistic_method(fl, probability_threshold = 0.95, metric = 'end'))
+      
     } else if(estimator_name=='pearse'){
       #transpose flowering dates to negative
       #to estimate the end of flowering
