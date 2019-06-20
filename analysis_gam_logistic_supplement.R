@@ -8,6 +8,17 @@ source('config.R')
 # The 2nd section plots the GAM output across the full calendar year (DOY 1-365) for different scenarios, showing
 # how the GAM curve can be overfit as the amount of absences change. 
 
+#############################################
+
+add_pretty_facet_text = function(df){
+  df = df %>%
+    mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
+           percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
+  df$sample_size_display = forcats::fct_reorder(df$sample_size_display, 
+                                                df$sample_size)
+  return(df)
+}
+
 ##############################################
 ##############################################
 ##############################################
@@ -36,17 +47,21 @@ errors = gam_logistic_estimates %>%
             R2 = 1 - (sum((estimate - actual_doy)**2) / sum((estimate - mean(actual_doy))**2))) %>%
   ungroup()
 
+errors = add_pretty_facet_text(errors)
+
 # For GAM
 gam_threshold_plot = ggplot(filter(errors, method=='gam'), aes(x=threshold, y=R2, color=metric)) + 
   geom_line(size=1.5) +
   geom_point(size=3) + 
+  scale_color_manual(values=c('black','grey60')) + 
   scale_x_continuous(breaks=unique(errors$threshold)) + 
-  facet_wrap(sample_size~percent_yes, labeller = label_both)+
+  facet_wrap(sample_size_display~percent_yes_display)+
   theme_bw() + 
   theme(panel.grid.minor.x = element_blank(),
         strip.text = element_text(size=16),
         axis.text = element_text(size=12),
         axis.title = element_text(size=18),
+        legend.key.width = unit(20,'mm'),
         legend.text = element_text(size=16),
         legend.title = element_text(size=18),
         legend.position = 'bottom') +
@@ -56,23 +71,25 @@ gam_threshold_plot = ggplot(filter(errors, method=='gam'), aes(x=threshold, y=R2
 ggsave(filename = 'manuscript/figs/fig_S4_gam_threshold_evaluation.png', plot = gam_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
 
 # For Logistic
-gam_threshold_plot = ggplot(filter(errors, method=='logistic'), aes(x=threshold, y=R2, color=metric)) + 
+logistic_threshold_plot = ggplot(filter(errors, method=='logistic'), aes(x=threshold, y=R2, color=metric)) + 
   geom_line(size=1.5) +
   geom_point(size=3) + 
+  scale_color_manual(values=c('black','grey60')) + 
   scale_x_continuous(breaks=unique(errors$threshold)) + 
-  facet_wrap(sample_size~percent_yes, labeller = label_both)+
+  facet_wrap(sample_size_display~percent_yes_display)+
   theme_bw() + 
   theme(panel.grid.minor.x = element_blank(),
         strip.text = element_text(size=16),
         axis.text = element_text(size=12),
         axis.title = element_text(size=18),
+        legend.key.width = unit(20,'mm'),
         legend.text = element_text(size=16),
         legend.title = element_text(size=18),
         legend.position = 'bottom') +
   labs(subtitle='Logistic Performance Using Different Probability Thresholds',
        x='Probability Threshold', y='R^2', color='Metric')
 
-ggsave(filename = 'manuscript/figs/fig_S5_logisitc_threshold_evaluation.png', plot = gam_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S5_logistic_threshold_evaluation.png', plot = logistic_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
 
 ################################################################
 ################################################################
@@ -189,14 +206,17 @@ for(this_sample_size in population_sample_sizes){
 
 all_estimates$metric = factor(all_estimates$metric, levels = c('onset','peak','end'), ordered=T)
 
+all_estimates = add_pretty_facet_text(all_estimates)
+all_probability_curves = add_pretty_facet_text(all_probability_curves)
+all_observations = add_pretty_facet_text(all_observations)
+
 gam_logistic_curve_plot = ggplot() + 
   geom_line(data = all_probability_curves, aes(x=doy, y=flowering_probability, linetype=method), size=1) +
   geom_jitter(data= all_observations, aes(x=doy, y=flowering),
               width = 0, height = 0.05) + 
-  geom_vline(data=all_estimates, aes(xintercept = estimate, color=metric, linetype=method),size=1) +
-  #scale_color_manual(values=c('#cbef43','#72a98f','#433a3f')) + 
-  scale_color_brewer(palette = 'Dark2') + 
-  facet_wrap(sample_size~percent_yes, labeller = label_both) +
+  geom_vline(data=all_estimates, aes(xintercept = estimate, color=metric, linetype=method),size=1.2) +
+  scale_color_manual(values=c('#56B4E9','#F0E442','#D55E00')) + 
+  facet_wrap(sample_size_display~percent_yes_display) +
   labs(y='Flowering Probability',x='Day Of Year (DOY)', color='Estimate Type',
        linetype='Method') + 
   theme_bw() + 
