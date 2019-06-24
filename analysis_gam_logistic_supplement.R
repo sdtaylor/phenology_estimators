@@ -50,10 +50,10 @@ errors = gam_logistic_estimates %>%
 errors = add_pretty_facet_text(errors)
 
 # For GAM
-gam_threshold_plot = ggplot(filter(errors, method=='gam'), aes(x=threshold, y=R2, color=metric)) + 
+gam_logistic_threshold_plot = ggplot(errors, aes(x=threshold, y=R2, color=method, linetype=metric)) + 
   geom_line(size=1.5) +
   geom_point(size=3) + 
-  scale_color_manual(values=c('black','grey60')) + 
+  scale_color_manual(values=c('black','#D55E00')) + 
   scale_x_continuous(breaks=unique(errors$threshold)) + 
   facet_wrap(sample_size_display~percent_yes_display)+
   theme_bw() + 
@@ -65,31 +65,10 @@ gam_threshold_plot = ggplot(filter(errors, method=='gam'), aes(x=threshold, y=R2
         legend.text = element_text(size=16),
         legend.title = element_text(size=18),
         legend.position = 'bottom') +
-  labs(subtitle='GAM Performance Using Different Probability Thresholds',
-       x='Probability Threshold', y='R^2', color='Metric')
+  labs(subtitle='Performance Using Different Probability Thresholds',
+       x='Probability Threshold', y='R^2', color='Method', linetype='Metric')
 
-ggsave(filename = 'manuscript/figs/fig_S4_gam_threshold_evaluation.png', plot = gam_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
-
-# For Logistic
-logistic_threshold_plot = ggplot(filter(errors, method=='logistic'), aes(x=threshold, y=R2, color=metric)) + 
-  geom_line(size=1.5) +
-  geom_point(size=3) + 
-  scale_color_manual(values=c('black','grey60')) + 
-  scale_x_continuous(breaks=unique(errors$threshold)) + 
-  facet_wrap(sample_size_display~percent_yes_display)+
-  theme_bw() + 
-  theme(panel.grid.minor.x = element_blank(),
-        strip.text = element_text(size=16),
-        axis.text = element_text(size=12),
-        axis.title = element_text(size=18),
-        legend.key.width = unit(20,'mm'),
-        legend.text = element_text(size=16),
-        legend.title = element_text(size=18),
-        legend.position = 'bottom') +
-  labs(subtitle='Logistic Performance Using Different Probability Thresholds',
-       x='Probability Threshold', y='R^2', color='Metric')
-
-ggsave(filename = 'manuscript/figs/fig_S5_logistic_threshold_evaluation.png', plot = logistic_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S4_gam_logistic_threshold_evaluation.png', plot = gam_logistic_threshold_plot, dpi = 200, height = 24, width = 28, units = 'cm')
 
 ################################################################
 ################################################################
@@ -231,6 +210,6 @@ gam_logistic_curve_plot = ggplot() +
         strip.background = element_rect(fill='grey95'),
         panel.background = element_rect(fill='grey85'))
 
-ggsave(filename = 'manuscript/figs/fig_S6_gam_logistic_curves.png', plot = gam_logistic_curve_plot, dpi = 100, height = 25, width = 35, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S5_gam_logistic_curves.png', plot = gam_logistic_curve_plot, dpi = 100, height = 25, width = 35, units = 'cm')
 
 
