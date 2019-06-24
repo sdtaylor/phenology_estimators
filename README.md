@@ -70,6 +70,6 @@ To run the analysis from scratch, run the scripts in the following order:
 `analysis_and_figures.R`
 `analysis_proportion_of_obs_kept.R`
 
-This will take from 12-24 hours in total to run depending on the system. To decrease this time set the bootstrap amounts in `config.R` to something smaller, such as 15 for the population and 3 for the individual. 
+This will take from 20-35 hours in total to run depending on the system. To decrease this time set the bootstrap amounts in `config.R` to something smaller, such as 10 for the population and 2 for the individual. The results will not be as precise, but the runtime should be less than 1 hour. 
 
 Alternatively, you can obtain the results from the computationally intensive steps from the Zenodo repository ([https://doi.org/10.5281/zenodo.3234913](https://doi.org/10.5281/zenodo.3234913)) in the `derived_data` folder. With these in place run `analysis_and_figures.R` and `analysis_proportion_of_obs_kept.R` to generate the figures. 
