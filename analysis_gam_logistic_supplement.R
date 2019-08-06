@@ -11,12 +11,20 @@ source('config.R')
 #############################################
 
 add_pretty_facet_text = function(df){
-  df = df %>%
-    mutate(sample_size_display = paste('Sample Size',sample_size, sep = ' : '),
-           percent_yes_display = paste0('Presence Percent : ',percent_yes*100,'%'))
-  df$sample_size_display = forcats::fct_reorder(df$sample_size_display, 
-                                                df$sample_size)
-  return(df)
+  population_subplot_labels = tribble(
+    ~sample_size, ~percent_yes, ~top_label, ~bottom_label,
+    10,  0.25, 'A. Sample Size: 10', 'Presence Percent: 25%',
+    10,  0.5,  'B. Sample Size: 10', 'Presence Percent: 50%',
+    10,  0.75, 'C. Sample Size: 10', 'Presence Percent: 75%',
+    50,  0.25, 'D. Sample Size: 50', 'Presence Percent: 25%',
+    50,  0.5,  'E. Sample Size: 50', 'Presence Percent: 50%',
+    50,  0.75, 'F. Sample Size: 50', 'Presence Percent: 75%',  
+    100, 0.25, 'G. Sample Size: 100', 'Presence Percent: 25%',
+    100, 0.5,  'H. Sample Size: 100', 'Presence Percent: 50%',
+    100, 0.75, 'I. Sample Size: 100', 'Presence Percent: 75%'
+  )
+  df %>%
+    left_join(population_subplot_labels, by=c('sample_size','percent_yes'))
 }
 
 ##############################################
@@ -55,7 +63,7 @@ gam_logistic_threshold_plot = ggplot(errors, aes(x=threshold, y=R2, color=method
   geom_point(size=3) + 
   scale_color_manual(values=c('black','#D55E00')) + 
   scale_x_continuous(breaks=unique(errors$threshold)) + 
-  facet_wrap(sample_size_display~percent_yes_display)+
+  facet_wrap(top_label~bottom_label)+
   theme_bw() + 
   theme(panel.grid.minor.x = element_blank(),
         strip.text = element_text(size=16),
@@ -68,7 +76,7 @@ gam_logistic_threshold_plot = ggplot(errors, aes(x=threshold, y=R2, color=method
   labs(subtitle='Performance Using Different Probability Thresholds',
        x='Probability Threshold', y='R^2', color='Method', linetype='Metric')
 
-ggsave(filename = 'manuscript/figs/fig_S4_gam_logistic_threshold_evaluation.png', plot = gam_logistic_threshold_plot, dpi = 400, height = 24, width = 28, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S4_gam_logistic_threshold_evaluation.png', plot = gam_logistic_threshold_plot, dpi = 300, height = 24, width = 28, units = 'cm')
 
 ################################################################
 ################################################################
@@ -195,7 +203,7 @@ gam_logistic_curve_plot = ggplot() +
               width = 0, height = 0.05) + 
   geom_vline(data=all_estimates, aes(xintercept = estimate, color=metric, linetype=method),size=1.2) +
   scale_color_manual(values=c('#56B4E9','#F0E442','#D55E00')) + 
-  facet_wrap(sample_size_display~percent_yes_display) +
+  facet_wrap(top_label~bottom_label)+
   labs(y='Flowering Probability',x='Day Of Year (DOY)', color='Estimate Type',
        linetype='Method') + 
   theme_bw() + 
@@ -210,6 +218,6 @@ gam_logistic_curve_plot = ggplot() +
         strip.background = element_rect(fill='grey95'),
         panel.background = element_rect(fill='grey85'))
 
-ggsave(filename = 'manuscript/figs/fig_S5_gam_logistic_curves.png', plot = gam_logistic_curve_plot, dpi = 400, height = 25, width = 35, units = 'cm')
+ggsave(filename = 'manuscript/figs/fig_S5_gam_logistic_curves.png', plot = gam_logistic_curve_plot, dpi = 300, height = 25, width = 35, units = 'cm')
 
 
