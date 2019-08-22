@@ -15,7 +15,7 @@ header-includes:
 fontsize: 12pt
 ---
 
-# Estimating transition dates from status-based phenology observations: a test of methods
+# Estimating flowering transition dates from status-based phenological observations: a test of methods
 
 Shawn D. Taylor
 
