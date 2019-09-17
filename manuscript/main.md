@@ -99,7 +99,7 @@ The Logistic and GAM methods had the highest R\textsuperscript{2}, and similar m
 
 The Mean Midway and Mean Midway 7-Day methods were never the best performing methods for estimating population onset. The Mean Midway method did not improve by increasing the sample size or by increasing the proportion of flowering presence observations. Results from the Mean Midway 7-Day method using a sample size of 10 were excluded due to less than 1% of random samples resulting in a usable estimate. This was due to the requirement of each individual plant having at least one presence and one prior absence observation. The usable number of estimates for the remaining scenarios ranged from 2-10% (Fig. S1). With a sample size of 10 the GAM method only produced estimates 27-81% of the time because of too few absence observations, and 100% of the time in all other scenarios. 
 
-![The error distribution of all estimators for population onset. The density curves are each derived from 11,000 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_1_population_onset_errors.png)
+![The error distribution of all estimators for population onset. The panels indicate simulated sample sizes of 10 (A-C), 50 (D-F), and 100 (G-I), and presence proportions of 25% (A,D,G), 50% (B,E,H), and 75% (C,F,I). The density curves are each derived from 11,000 randomly drawn observations across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_1_population_onset_errors.png)
 
 ## Population End Estimates
 
@@ -107,13 +107,13 @@ The end of flowering for the entire population was more difficult to estimate th
 
 With a sample size of 10 and presence proportion of 25% the Last Observed method had the highest R\textsuperscript{2}, but still underestimated the end date of flowering by 17 days the majority of the time (Fig. 2,A). The Midway method, both with and without the 7-day restriction, were never the best performing estimators. Without the 7-day restriction the method consistently overestimated the end date. With the 7-day restriction the method consistently underestimated the end date. Neither Midway method improved with either increasing sample size or increasing proportion of flowering presence. As in the population onset the results from the Mean Midway 7-Day method were excluded due to less than 1% of estimates being usable, and the GAM method had a low proportion (27-81%) of usable estimates with a sample size of 10 (Fig. S1).
 
-![The error distribution of all estimators for population end. The density curves are each derived from 11,000 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_2_population_end_errors.png)
+![The error distribution of all estimators for population end. The panels indicate simulated sample sizes of 10 (A-C), 50 (D-F), and 100 (G-I), and presence proportions of 25% (A,D,G), 50% (B,E,H), and 75% (C,F,I). The density curves are each derived from 11,000 randomly drawn observations across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_2_population_end_errors.png)
 
 ## Population Peak Estimates
 
 All three methods to estimate peak flowering had median error rates of 1 day except in one instance, using the GAM method for a sample size of 10 and proportion of flower presence 75% (Fig. 3, C). The Mean Flowering method had the highest R\textsuperscript{2} in all scenarios except three where it had R\textsuperscript{2} values equal to the Survival Curve method. For the Mean and Survival Curve methods, errors improved with both increasing sample size and increasing proportion of flowering presence. For the GAM method errors improved with increasing sample size, but worsened with increasing proportion of flowering presence. 
 
-![The error distribution of all estimators for population peak. The density curves are each derived from 11,000 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_3_population_peak_errors.png)
+![The error distribution of all estimators for population peak. The panels indicate simulated sample sizes of 10 (A-C), 50 (D-F), and 100 (G-I), and presence proportions of 25% (A,D,G), 50% (B,E,H), and 75% (C,F,I). The density curves are each derived from 11,000 randomly drawn observations across eleven years of phenological data. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_3_population_peak_errors.png)
 
 ## Individual Onset and End Estimates
 
@@ -123,7 +123,7 @@ The Weibull, Midway, Logistic, and GAM methods never produced the best estimate 
 
 The errors from individual end estimates were nearly identical to individual onset errors, thus the model performance outcomes were the same. Individual end errors are supplied in the supplement (Fig. S3). 
 
-![The error distribution of all estimators for individual onset. The density curves are each derived from 4840 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data for 286 individual plants. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_4_individual_onset_errors.png)
+![The error distribution of all estimators for individual onset. The panels indicate simulated sample sizes of 10 (A-C), 15 (D-F), and 20 (G-I), and presence proportions of 25% (A,D,G), 50% (B,E,H), and 75% (C,F,I). The density curves are each derived from 4840 randomly drawn observations, with sample size and presence proportion stated, across eleven years of phenological data for 286 individual plants. Text values represent the median error and the 95% quantile range in parenthesis.](figs/fig_4_individual_onset_errors.png)
 
 # Discussion
 
